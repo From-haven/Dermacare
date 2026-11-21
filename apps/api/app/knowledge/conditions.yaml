@@ -1,0 +1,199 @@
+kb_version: "kb-2026.11-draft1"
+status: DRAFT_NOT_CLINICIAN_REVIEWED
+disclaimer_vi: "Nội dung tham khảo, chưa được bác sĩ duyệt. Không phải chẩn đoán."
+conditions:
+
+- slug: acne_vulgaris
+  name_vi: "Mụn trứng cá"
+  name_en: "Acne"
+  summary_vi: "Nhân mụn đầu đen hoặc đầu trắng, nốt sẩn đỏ và mụn mủ, thường ở mặt, ngực, lưng; kéo dài hoặc tái phát từng đợt, có thể để lại vết thâm."
+  summary_en: "Blackheads or whiteheads, red bumps and pus-filled spots, usually on the face, chest and back; persistent or recurring, may leave dark marks."
+  body_sites: [face, neck, trunk_front, back]
+  weights: {site_face: 1, site_back: 0.6, site_trunk_front: 0.5, site_neck: 0.2, papules: 0.9, pustules: 0.8, blackheads: 0.9, redness: 0.5, recurrent: 0.6, pain: 0.3, dark_patch: 0.3, onset_gt2m: 0.6, onset_2_8w: 0.3, img_components: 0.8, img_dispersion: 0.6, img_red_contrast: 0.4}
+  sources: [{title: "AAD – Acne (trang tổng quan/signs & symptoms)", url: null, retrieved: false}]
+
+- slug: atopic_dermatitis
+  name_vi: "Viêm da cơ địa (chàm thể tạng)"
+  name_en: "Atopic dermatitis (eczema)"
+  summary_vi: "Da rất ngứa, khô, đỏ hoặc sẫm màu, có thể bong vảy, nứt, rỉ dịch rồi đóng mày; hay ở nếp khuỷu, khoeo, cổ, cổ tay, mặt, và dễ tái phát. Ở người da sẫm có thể thấy sẩn xám đến nâu tím."
+  summary_en: "Very itchy, dry, red or darker patches that may flake, crack, ooze and crust; often in elbow/knee folds, neck, wrists, face; tends to recur."
+  body_sites: [face, neck, arms, hands, legs, folds]
+  weights: {itch: 1, dryness: 0.9, redness: 0.6, scaling: 0.6, oozing: 0.4, crusting: 0.4, cracking: 0.4, plaques: 0.5, recurrent: 0.8, onset_gt2m: 0.7, site_arms: 0.8, site_hands: 0.6, site_neck: 0.5, site_face: 0.4, site_folds: 0.6, site_legs: 0.5, img_area: 0.5, img_texture: 0.5}
+  sources:
+    - {title: "AAD – Atopic dermatitis: signs and symptoms", url: "https://www.aad.org/public/diseases/eczema/types/atopic-dermatitis/symptoms", retrieved: true}
+    - {title: "NIAMS/NIH – Atopic dermatitis", url: "https://www.niams.nih.gov/health_info/atopic_dermatitis", retrieved: true}
+    - {title: "MedlinePlus – Atopic dermatitis", url: "https://medlineplus.gov/ency/article/000853.htm", retrieved: true}
+
+- slug: plaque_psoriasis
+  name_vi: "Vảy nến thể mảng"
+  name_en: "Plaque psoriasis"
+  summary_vi: "Mảng da dày, ranh giới rõ, phủ vảy trắng bạc (da sẫm có thể màu nâu tím/xám), hay ở khuỷu tay, đầu gối, lưng dưới, da đầu; có thể ngứa, đau, đổi màu móng; thường kéo dài và tái phát."
+  summary_en: "Thick, well-defined patches covered with silvery scale (purple/brown/grey on darker skin), often on elbows, knees, lower back, scalp; may itch or hurt; nail changes possible; chronic and relapsing."
+  body_sites: [scalp, arms, legs, back, trunk_front, nails, hands, feet]
+  weights: {plaques: 1, scaling: 1, redness: 0.7, itch: 0.6, pain: 0.3, cracking: 0.3, recurrent: 0.8, onset_gt2m: 0.8, site_scalp: 0.8, site_arms: 0.8, site_legs: 0.8, site_back: 0.6, site_nails: 0.4, img_area: 0.6, img_texture: 0.6}
+  sources:
+    - {title: "AAD – Psoriasis: signs and symptoms", url: "https://www.aad.org/public/diseases/psoriasis/what/symptoms", retrieved: true}
+    - {title: "AAD – Psoriasis overview", url: "https://www.aad.org/public/diseases/scaly-skin/psoriasis/what-is-psoriasis", retrieved: true}
+    - {title: "MedlinePlus – Psoriasis", url: "https://medlineplus.gov/ency/article/000434.htm", retrieved: true}
+    - {title: "National Psoriasis Foundation – Plaque psoriasis", url: "https://www.psoriasis.org/plaque", retrieved: true}
+
+- slug: contact_dermatitis
+  name_vi: "Viêm da tiếp xúc"
+  name_en: "Contact dermatitis"
+  summary_vi: "Vùng da đỏ, ngứa hoặc rát, có thể nổi mụn nước, rỉ dịch hoặc bong vảy, xuất hiện ở đúng vùng tiếp xúc với hoá chất, kim loại, mỹ phẩm hoặc cây cỏ; thường nổi sau khi tiếp xúc."
+  summary_en: "Red, itchy or burning skin, sometimes with blisters, oozing or scaling, located where skin touched a chemical, metal, cosmetic or plant; appears after exposure."
+  body_sites: [hands, face, arms, neck, other]
+  weights: {contact_trigger: 1, itch: 0.9, redness: 0.8, blisters: 0.5, oozing: 0.4, burning: 0.5, scaling: 0.3, onset_lt3d: 0.5, onset_3_14d: 0.5, site_hands: 0.7, site_face: 0.4, site_arms: 0.4, site_neck: 0.3, site_other: 0.3, img_area: 0.4}
+  sources: [{title: "AAD – Contact dermatitis (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: seborrheic_dermatitis
+  name_vi: "Viêm da tiết bã"
+  name_en: "Seborrheic dermatitis"
+  summary_vi: "Mảng đỏ phủ vảy nhờn, vàng hoặc trắng ở da đầu, lông mày, hai bên cánh mũi, sau tai, giữa ngực; ngứa nhẹ đến vừa, hay tái phát."
+  summary_en: "Red patches with greasy yellow or white scale on scalp, eyebrows, sides of the nose, behind ears, mid-chest; mild to moderate itch; recurs."
+  body_sites: [scalp, face, trunk_front, folds]
+  weights: {greasy_scale: 1, scaling: 0.8, redness: 0.6, itch: 0.5, recurrent: 0.8, onset_gt2m: 0.7, site_scalp: 1, site_face: 1, site_trunk_front: 0.3, site_folds: 0.3, img_red_contrast: 0.4}
+  sources: [{title: "AAD – Seborrheic dermatitis (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: urticaria
+  name_vi: "Mề đay (nổi mẩn phù)"
+  name_en: "Hives (urticaria)"
+  summary_vi: "Các mảng phù nổi cao, hồng hoặc đỏ, ngứa nhiều, có thể di chuyển và mờ đi trong vài giờ rồi nơi khác lại nổi; xuất hiện nhanh, có thể ở bất kỳ vùng nào."
+  summary_en: "Raised pink or red itchy wheals that come and go within hours and may move around; appear quickly on any part of the body."
+  body_sites: []
+  weights: {wheals: 1, itch: 1, redness: 0.6, onset_sudden: 0.8, onset_lt3d: 0.7, spreading: 0.5, recurrent: 0.4, site_trunk_front: 0.6, site_arms: 0.6, site_legs: 0.6, site_back: 0.5, site_face: 0.4, img_dispersion: 0.7}
+  sources: [{title: "AAD – Hives (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: tinea_ringworm
+  name_vi: "Nấm da (hắc lào, nấm bẹn, nấm chân)"
+  name_en: "Ringworm / tinea (body, groin, feet)"
+  summary_vi: "Mảng tròn hoặc vòng, bờ đỏ hơi nổi và có vảy, giữa mảng thường nhạt hơn; ngứa; có thể lan rộng chậm; ở bẹn, kẽ chân hoặc lòng bàn chân có thể không thành vòng mà đỏ, bong, nứt."
+  summary_en: "Round or ring-shaped patch with a slightly raised scaly red border and clearer centre; itchy; slowly enlarges; in groin or feet it may appear as red, peeling, cracked skin without a ring."
+  body_sites: [trunk_front, back, arms, legs, folds, feet, hands, scalp, nails]
+  weights: {ring_shape: 1, scaling: 0.8, itch: 0.9, redness: 0.6, plaques: 0.6, spreading: 0.5, sweat_heat_trigger: 0.5, onset_2_8w: 0.6, onset_3_14d: 0.4, site_folds: 0.8, site_feet: 0.8, site_trunk_front: 0.5, site_legs: 0.5, site_arms: 0.4, site_hands: 0.3, site_scalp: 0.3, site_nails: 0.2, img_dispersion: 0.3, img_texture: 0.4}
+  sources:
+    - {title: "CDC – Symptoms of ringworm", url: "https://www.cdc.gov/ringworm/signs-symptoms/", retrieved: true}
+    - {title: "AAD – Ringworm: signs and symptoms", url: "https://www.aad.org/diseases/a-z/ringworm-symptoms", retrieved: true}
+    - {title: "MedlinePlus – Ringworm, body", url: "https://medlineplus.gov/ency/article/000877.htm", retrieved: true}
+    - {title: "Harvard Health – Ringworm (tinea)", url: "https://www.health.harvard.edu/a-to-z/ringworm-tinea-a-to-z", retrieved: true}
+    - {title: "Mayo Clinic – Ringworm (body)", url: "https://www.mayoclinic.org/diseases-conditions/ringworm-body/diagnosis-treatment/drc-20353782", retrieved: true}
+
+- slug: impetigo
+  name_vi: "Chốc (nhiễm khuẩn da nông)"
+  name_en: "Impetigo"
+  summary_vi: "Mụn nước nhỏ hoặc bọng nước vỡ nhanh để lại vết đỏ rỉ dịch, rồi đóng vảy màu vàng mật ong; hay ở quanh mũi, miệng, tay, chân; ngứa hoặc đau nhẹ; có thể lan sang chỗ khác."
+  summary_en: "Small blisters or larger bullae that burst quickly, leaving red oozing patches that form honey-coloured crusts; often around nose, mouth, hands and legs; mild itch or soreness; can spread."
+  body_sites: [face, hands, arms, legs, other]
+  weights: {crusting: 1, oozing: 0.7, blisters: 0.6, pustules: 0.4, redness: 0.6, itch: 0.5, pain: 0.3, spreading: 0.6, onset_3_14d: 0.6, onset_lt3d: 0.3, site_face: 1, site_hands: 0.5, site_arms: 0.5, site_legs: 0.4, img_components: 0.4}
+  sources:
+    - {title: "AAD – Impetigo: signs and symptoms", url: "https://www.aad.org/public/diseases/a-z/impetigo-symptoms", retrieved: true}
+    - {title: "CDC – About impetigo", url: "https://cdc.gov/group-a-strep/about/impetigo.html", retrieved: true}
+    - {title: "Harvard Health – Impetigo", url: "https://www.health.harvard.edu/a_to_z/impetigo-a-to-z", retrieved: true}
+
+- slug: folliculitis
+  name_vi: "Viêm nang lông"
+  name_en: "Folliculitis"
+  summary_vi: "Nhiều nốt đỏ nhỏ hoặc mụn mủ có sợi lông ở giữa, hơi ngứa hoặc đau, hay ở lưng, ngực, đùi, mông, vùng cạo lông; có thể nặng hơn khi nóng ẩm, mồ hôi."
+  summary_en: "Many small red bumps or pustules centred on hair follicles, mildly itchy or tender, often on back, chest, thighs, buttocks or shaved areas; worse with heat and sweat."
+  body_sites: [back, trunk_front, legs, folds, arms, face]
+  weights: {pustules: 0.9, papules: 0.8, redness: 0.6, itch: 0.5, pain: 0.5, sweat_heat_trigger: 0.5, onset_3_14d: 0.5, site_back: 0.6, site_legs: 0.6, site_trunk_front: 0.5, site_folds: 0.5, site_arms: 0.4, site_face: 0.3, img_components: 0.8, img_dispersion: 0.6}
+  sources: [{title: "AAD – Folliculitis (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: rosacea
+  name_vi: "Trứng cá đỏ (rosacea)"
+  name_en: "Rosacea"
+  summary_vi: "Đỏ ở giữa mặt (má, mũi, trán, cằm), hay đỏ bừng từng đợt, có thể kèm nốt sẩn, mụn mủ, rát hoặc châm chích; kéo dài và tái diễn; không có nhân mụn đầu đen điển hình."
+  summary_en: "Central facial redness (cheeks, nose, forehead, chin) with flushing episodes, sometimes bumps, pustules, burning or stinging; long-lasting and recurring; no typical blackheads."
+  body_sites: [face]
+  weights: {flushing: 1, redness: 1, papules: 0.6, pustules: 0.5, burning: 0.6, recurrent: 0.7, onset_gt2m: 0.8, contact_trigger: 0.2, site_face: 1, img_red_contrast: 0.7}
+  sources: [{title: "AAD – Rosacea (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: vitiligo
+  name_vi: "Bạch biến"
+  name_en: "Vitiligo"
+  summary_vi: "Mảng da mất màu trắng sữa, ranh giới rõ, thường không ngứa không bong vảy; hay ở mặt, bàn tay, nếp gấp, quanh miệng/mắt; xuất hiện dần và kéo dài."
+  summary_en: "Sharply defined milk-white patches of lost pigment, usually without itch or scale; often on face, hands, folds, around mouth/eyes; appears gradually and persists."
+  body_sites: [face, hands, folds, arms, feet]
+  weights: {pale_patch: 1, onset_gt2m: 0.8, onset_2_8w: 0.3, site_hands: 0.6, site_face: 0.6, site_folds: 0.4, site_arms: 0.4, site_feet: 0.3, itch: 0.1, img_light_contrast: 1}
+  sources: [{title: "AAD – Vitiligo (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: melasma
+  name_vi: "Nám da"
+  name_en: "Melasma"
+  summary_vi: "Mảng sạm nâu đến xám đối xứng ở má, trán, môi trên, sống mũi; không ngứa, không bong vảy; kéo dài, có thể đậm lên khi nắng; hay gặp ở nữ."
+  summary_en: "Symmetric brown to grey-brown patches on cheeks, forehead, upper lip, nose bridge; no itch or scale; long-lasting, may darken with sun."
+  body_sites: [face]
+  weights: {dark_patch: 1, onset_gt2m: 0.9, recurrent: 0.5, site_face: 1, itch: 0.0, redness: 0.0, img_light_contrast: 0.9}
+  sources: [{title: "AAD – Melasma (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: warts
+  name_vi: "Mụn cóc"
+  name_en: "Warts"
+  summary_vi: "Cục sần nhỏ bề mặt thô ráp như hoa lơ, có thể có chấm đen nhỏ; hay ở bàn tay, ngón tay, bàn chân (lòng bàn chân có thể đau khi đi); thường không ngứa; tồn tại lâu."
+  summary_en: "Small rough cauliflower-like bumps, sometimes with tiny black dots; often on hands, fingers and feet (soles may hurt when walking); usually not itchy; long-standing."
+  body_sites: [hands, feet, face, arms]
+  weights: {warty_surface: 1, papules: 0.6, pain: 0.3, onset_gt2m: 0.6, onset_2_8w: 0.4, site_hands: 1, site_feet: 0.7, site_face: 0.3, site_arms: 0.3, itch: 0.1, img_components: 0.5}
+  sources: [{title: "AAD – Warts (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: scabies
+  name_vi: "Ghẻ"
+  name_en: "Scabies"
+  summary_vi: "Ngứa dữ dội nhất là về đêm, nốt sẩn nhỏ và đường hầm mảnh ở kẽ ngón tay, cổ tay, nách, vùng thắt lưng, bẹn; người sống cùng cũng thường bị ngứa; có thể trầy xước, đóng mày."
+  summary_en: "Intense itch, worst at night, with small bumps and thin burrow lines between fingers, wrists, armpits, waist and groin; household contacts often itch too; scratching may cause crusts."
+  body_sites: [hands, folds, trunk_front, arms, legs, feet]
+  weights: {night_itch_contacts: 1, itch: 1, papules: 0.7, crusting: 0.4, redness: 0.4, spreading: 0.5, onset_2_8w: 0.6, onset_3_14d: 0.4, site_hands: 0.9, site_folds: 0.8, site_trunk_front: 0.5, site_arms: 0.5, site_legs: 0.3, site_feet: 0.3, img_components: 0.8, img_dispersion: 0.6}
+  sources: [{title: "CDC – Scabies (symptoms)", url: null, retrieved: false}]
+
+- slug: pityriasis_rosea
+  name_vi: "Phấn hồng"
+  name_en: "Pityriasis rosea"
+  summary_vi: "Thường bắt đầu bằng một mảng hồng hình bầu dục lớn, vài ngày đến vài tuần sau xuất hiện nhiều mảng nhỏ hơn có viền vảy mỏng ở thân mình, lưng, đôi khi cánh tay đùi; ngứa nhẹ đến vừa."
+  summary_en: "Often starts with one larger oval pink patch, followed days to weeks later by smaller patches with a thin scale edge on trunk and back, sometimes upper arms and thighs; mild to moderate itch."
+  body_sites: [trunk_front, back, arms, legs, neck]
+  weights: {plaques: 0.6, scaling: 0.6, redness: 0.6, itch: 0.5, onset_2_8w: 0.6, onset_3_14d: 0.4, site_trunk_front: 0.8, site_back: 0.8, site_arms: 0.4, site_legs: 0.3, site_neck: 0.2, img_area: 0.5, img_components: 0.5}
+  sources: [{title: "AAD – Pityriasis rosea (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: keratosis_pilaris
+  name_vi: "Sừng hoá nang lông (da gà)"
+  name_en: "Keratosis pilaris"
+  summary_vi: "Nhiều sẩn nhỏ cùng màu da hoặc hơi đỏ/sẫm, sờ thô ráp như da gà, ở mặt ngoài cánh tay, đùi, đôi khi má; da khô, ít ngứa; kéo dài nhiều năm."
+  summary_en: "Many tiny skin-coloured, reddish or darker rough bumps like goose-flesh on outer arms, thighs, sometimes cheeks; dry skin, little itch; lasts for years."
+  body_sites: [arms, legs, face, back]
+  weights: {papules: 0.9, dryness: 0.8, scaling: 0.3, redness: 0.3, itch: 0.2, recurrent: 0.6, onset_gt2m: 1, site_arms: 1, site_legs: 0.8, site_face: 0.3, site_back: 0.1, img_components: 1, img_dispersion: 0.7}
+  sources: [{title: "AAD – Keratosis pilaris (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: herpes_zoster
+  name_vi: "Zona (giời leo)"
+  name_en: "Shingles (herpes zoster)"
+  summary_vi: "Đau rát hoặc châm chích trước, rồi nổi dải mụn nước đỏ chỉ ở một bên cơ thể (thường quanh thân mình hoặc một bên mặt), sau đó vỡ và đóng vảy."
+  summary_en: "Burning or tingling pain first, then a band of red blisters on one side of the body (often around the trunk or one side of the face) that later burst and crust."
+  body_sites: [trunk_front, back, face, neck]
+  weights: {one_sided_band: 1, blisters: 0.9, pain: 1, burning: 0.8, redness: 0.6, itch: 0.3, crusting: 0.4, onset_3_14d: 0.6, onset_lt3d: 0.3, site_trunk_front: 0.6, site_back: 0.5, site_face: 0.3, site_neck: 0.2}
+  sources: [{title: "AAD – Shingles (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: tinea_versicolor
+  name_vi: "Lang ben"
+  name_en: "Tinea versicolor"
+  summary_vi: "Nhiều đốm hoặc mảng tròn nhỏ trắng nhạt hoặc nâu hồng, có vảy mịn, ở cổ, ngực, lưng, bả vai, cánh tay; ngứa nhẹ hoặc không; hay tái phát khi nóng ẩm, ra mồ hôi."
+  summary_en: "Many small round pale or pink-brown spots or patches with fine scale on neck, chest, back, shoulders and arms; little or no itch; recurs in hot, humid weather."
+  body_sites: [trunk_front, back, neck, arms]
+  weights: {pale_patch: 0.6, dark_patch: 0.5, scaling: 0.5, itch: 0.3, sweat_heat_trigger: 0.8, recurrent: 0.7, onset_gt2m: 0.7, site_trunk_front: 0.9, site_back: 0.9, site_arms: 0.5, site_neck: 0.4, img_light_contrast: 0.8, img_components: 0.6}
+  sources: [{title: "MedlinePlus – Tinea versicolor (ency)", url: null, retrieved: false}]
+
+- slug: miliaria
+  name_vi: "Rôm sảy"
+  name_en: "Heat rash (miliaria)"
+  summary_vi: "Nhiều chấm hoặc sẩn đỏ nhỏ li ti, có thể có bọng nước nhỏ trong, ngứa hoặc châm chích, xuất hiện khi nóng ẩm, ra nhiều mồ hôi, ở cổ, ngực, lưng, nếp gấp, nơi quần áo bó."
+  summary_en: "Clusters of tiny red bumps, sometimes clear small blisters, itchy or prickly, appearing in hot humid weather with sweating, on neck, chest, back, skin folds and under tight clothing."
+  body_sites: [trunk_front, back, neck, folds, face]
+  weights: {papules: 0.9, itch: 0.8, burning: 0.5, redness: 0.5, blisters: 0.3, sweat_heat_trigger: 1, onset_lt3d: 0.6, onset_3_14d: 0.4, site_trunk_front: 0.7, site_back: 0.7, site_neck: 0.7, site_folds: 0.6, site_face: 0.3, img_components: 1, img_dispersion: 0.7}
+  sources: [{title: "AAD – Heat rash (signs and symptoms)", url: null, retrieved: false}]
+
+- slug: dyshidrotic_eczema
+  name_vi: "Chàm tổ đỉa"
+  name_en: "Dyshidrotic eczema (pompholyx)"
+  summary_vi: "Mụn nước nhỏ sâu, ngứa nhiều ở cạnh ngón tay, lòng bàn tay, lòng bàn chân; sau đó khô, bong vảy, nứt; hay tái phát từng đợt."
+  summary_en: "Deep-set small itchy blisters along the sides of fingers, palms and soles, later drying, peeling and cracking; relapses in episodes."
+  body_sites: [hands, feet]
+  weights: {blisters: 1, itch: 1, cracking: 0.3, scaling: 0.4, recurrent: 0.7, onset_3_14d: 0.5, site_hands: 1, site_feet: 0.8, img_components: 0.5}
+  sources: [{title: "AAD – Dyshidrotic eczema (signs and symptoms)", url: null, retrieved: false}]

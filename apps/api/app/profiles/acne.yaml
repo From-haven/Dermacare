@@ -1,0 +1,44 @@
+id: acne
+version: "v1.0"
+label_vi: "Theo dõi Mụn trứng cá (Acne)"
+label_en: "Acne Follow-up"
+cadence_days_default: 7
+body_sites: [face, neck, back, trunk_front]
+disclaimer_vi: "Đây là trường theo dõi do nhóm thiết kế, KHÔNG phải thang đo đã xác thực. Không phải chẩn đoán."
+
+capture_guide:
+  overview: "Chụp thẳng toàn bộ khuôn mặt/vùng da ở khoảng cách 40-50 cm, ánh sáng tự nhiên đều hai bên."
+  closeup: "Chụp cận cảnh vùng có nhiều nốt mụn nhất ở khoảng cách 15-20 cm, giữ máy song song bề mặt da."
+
+symptom_form:
+  fields:
+    - id: discomfort
+      type: range
+      min: 0
+      max: 10
+      label_vi: "Mức độ đau rát, khó chịu (0: không đau, 10: rất đau)"
+    - id: new_lesions_estimate
+      type: select
+      options: [none, few, some, many]
+      label_vi: "Số lượng nốt mụn mới mọc trong tuần qua"
+    - id: products_in_use
+      type: text
+      label_vi: "Sản phẩm chăm sóc da/thuốc bôi đang dùng"
+    - id: change_notes
+      type: textarea
+      label_vi: "Ghi chú thay đổi nhận thấy"
+
+clinician_fields:
+  - id: iga_score
+    label: "IGA Score (0-4)"
+    type: integer
+    provenance: clinician_entered
+  - id: gags_score
+    label: "GAGS Score (0-44)"
+    type: integer
+    provenance: clinician_entered
+
+measurements_enabled:
+  - affected_area_ratio
+  - color_descriptor
+  - lesion_density

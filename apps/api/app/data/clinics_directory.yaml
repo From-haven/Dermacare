@@ -1,0 +1,94 @@
+directory_version: "dir-2026.11.21"
+checked_at: "2026-11-21"
+city: "TP. Hồ Chí Minh"
+clinics:
+
+- slug: bvdl-tphcm
+  name: "Bệnh viện Da liễu TP.HCM"
+  type: "Bệnh viện chuyên khoa da liễu hạng I (công lập)"
+  address_text: "2 Nguyễn Thông, phường Xuân Hòa, TP.HCM"
+  address_note: "Địa chỉ cũ: 2 Nguyễn Thông, Phường Võ Thị Sáu, Quận 3"
+  district: "Quận 3"
+  phone: "(028) 3930 8131"
+  hours_note: "T2–T6 7h–11h & 13h–16h; T7 7h30–11h & 13h–18h30; CN ngoài giờ"
+  lat: 10.7782
+  lng: 106.6853
+  geocode_status: ok
+  listing_type: directory
+  sources:
+    - {title: "Medpro – BV Da liễu TP.HCM", url: "https://medpro.vn/dalieuhcm", retrieved: true}
+
+- slug: bvdhyd-da-lieu-hong-bang
+  name: "Khoa Da liễu – Thẩm mỹ da, Bệnh viện Đại học Y Dược TP.HCM"
+  type: "Khoa da liễu của bệnh viện đại học (công lập)"
+  address_text: "215 Hồng Bàng, Phường 11, Quận 5, TP.HCM"
+  address_note: "Lầu 1, phòng 17–20"
+  district: "Quận 5"
+  phone: "(028) 3855 4269"
+  hours_note: "Giờ hành chính T2–T6 7h00–16h30; T7 7h00–11h30"
+  lat: 10.7554
+  lng: 106.6586
+  geocode_status: ok
+  listing_type: directory
+  sources:
+    - {title: "Medpro – Khoa Da liễu BV Đại học Y Dược TP.HCM", url: "https://medpro.vn/tin-tuc/khoa-da-lieu-bv-dai-hoc-y-duoc-tphcm", retrieved: true}
+
+- slug: bv-fv
+  name: "Bệnh viện FV (Khoa Da liễu)"
+  type: "Bệnh viện đa khoa tư nhân quốc tế"
+  address_text: "6 Nguyễn Lương Bằng, Phường Tân Phú, Quận 7, TP.HCM"
+  address_note: "Khu đô thị Phú Mỹ Hưng, Quận 7"
+  district: "Quận 7"
+  phone: "(028) 5411 3333"
+  hours_note: "T2–T6 8h–17h; T7 8h–12h"
+  lat: 10.7303
+  lng: 106.7218
+  geocode_status: ok
+  listing_type: directory
+  sources:
+    - {title: "Medpro – Cơ sở da liễu (BV FV)", url: "https://medpro.vn/tin-tuc/chua-cham-da-o-dau", retrieved: true}
+
+- slug: pk-pensilia
+  name: "Phòng khám Da liễu – Thẩm mỹ Pensilia"
+  type: "Phòng khám tư nhân chuyên khoa da liễu"
+  address_text: "413 Nguyễn Đình Chiểu, Phường 5, Quận 3, TP.HCM"
+  address_note: "Khu vực trung tâm Quận 3"
+  district: "Quận 3"
+  phone: "(028) 7304 5668"
+  hours_note: "T2–CN 9h00–20h00"
+  lat: 10.7712
+  lng: 106.6845
+  geocode_status: ok
+  listing_type: directory
+  sources:
+    - {title: "Hello Bacsi – Danh sách cơ sở Pensilia", url: "https://hellobacsi.com/care/benh-vien/benh-vien-da-lieu-tpho-chi-minh-1581", retrieved: true}
+
+- slug: pk-tao-do-q10
+  name: "Phòng khám Chuyên khoa Da liễu Táo Đỏ – Cơ sở Quận 10"
+  type: "Phòng khám tư nhân (da liễu)"
+  address_text: "35A1 đường 3/2, Phường 11, Quận 10, TP.HCM"
+  address_note: "Gần ngã tư Cao Thắng - 3/2"
+  district: "Quận 10"
+  phone: "0914 999 200"
+  hours_note: "T2–T7 8h00–20h00"
+  lat: 10.7738
+  lng: 106.6775
+  geocode_status: ok
+  listing_type: directory
+  sources:
+    - {title: "Hello Bacsi – Top phòng khám da liễu", url: "https://hellobacsi.com/suc-khoe/benh-vien/top-5-phong-kham-da-lieu-uy-tin-chat-luong-tai-tp-hcm/", retrieved: true}
+
+- slug: pk-tao-do-q5
+  name: "Phòng khám Chuyên khoa Da liễu Táo Đỏ – Cơ sở Quận 5"
+  type: "Phòng khám tư nhân (da liễu)"
+  address_text: "471 Nguyễn Chí Thanh, Phường 15, Quận 5, TP.HCM"
+  address_note: "Gần ngã tư Nguyễn Chí Thanh - Thuận Kiều"
+  district: "Quận 5"
+  phone: "0914 999 200"
+  hours_note: "T2–T7 8h00–20h00"
+  lat: 10.7588
+  lng: 106.6548
+  geocode_status: ok
+  listing_type: directory
+  sources:
+    - {title: "Hello Bacsi – Top phòng khám da liễu", url: "https://hellobacsi.com/suc-khoe/benh-vien/top-5-phong-kham-da-lieu-uy-tin-chat-luong-tai-tp-hcm/", retrieved: true}

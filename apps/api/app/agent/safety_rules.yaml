@@ -1,0 +1,168 @@
+rules_version: "sr-2026.11-draft1"
+status: PLACEHOLDER_NOT_CLINICIAN_REVIEWED
+default_action: ROUTINE
+
+rules:
+# ---------------- URGENT_MESSAGE ----------------
+- id: U01
+  action: URGENT_MESSAGE
+  when: {all: [{fact: face_lip_swelling_or_breathing, eq: true}]}
+  message_vi: "Bạn có dấu hiệu cần được đánh giá y tế khẩn cấp (sưng mặt/môi, hoặc khó thở/khó nuốt). Hãy đến cơ sở y tế/cấp cứu gần nhất ngay hoặc gọi 115. Ứng dụng dừng phân tích tại đây."
+  message_en: "You report signs that need urgent medical assessment (swelling of the face/lips, or trouble breathing/swallowing). Go to the nearest emergency facility now or call 115. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+- id: U02
+  action: URGENT_MESSAGE
+  when: {all: [{fact: fever, eq: true}, {fact: spreading_rapidly, eq: true}]}
+  message_vi: "Phát ban lan nhanh kèm sốt là dấu hiệu nên được đánh giá y tế ngay trong hôm nay. Hãy đến cơ sở y tế/cấp cứu hoặc gọi 115 nếu thấy mệt nhiều. Ứng dụng dừng phân tích tại đây."
+  message_en: "A rapidly spreading rash with fever needs medical assessment today. Go to a medical facility/emergency department or call 115 if you feel very unwell. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+- id: U03
+  action: URGENT_MESSAGE
+  when: {all: [{fact: blisters_mucosa, eq: true}]}
+  message_vi: "Phồng rộp hoặc loét quanh mắt, miệng hoặc vùng sinh dục cần được khám y tế ngay. Hãy đến cơ sở y tế/cấp cứu hoặc gọi 115. Ứng dụng dừng phân tích tại đây."
+  message_en: "Blisters or sores around the eyes, mouth or genitals need medical assessment right away. Go to a medical facility/emergency department or call 115. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+- id: U04
+  action: URGENT_MESSAGE
+  when: {all: [{fact: skin_peeling_or_raw_large, eq: true}]}
+  message_vi: "Da bong thành mảng lớn hoặc trầy xước, rỉ dịch trên diện rộng cần được khám y tế khẩn cấp. Hãy đến cơ sở y tế/cấp cứu hoặc gọi 115. Ứng dụng dừng phân tích tại đây."
+  message_en: "Skin peeling in large areas or large raw, oozing areas needs urgent medical assessment. Go to a medical facility/emergency department or call 115. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+- id: U05
+  action: URGENT_MESSAGE
+  when: {all: [{fact: purple_nonblanching_spots, eq: true}, {fact: fever, eq: true}]}
+  message_vi: "Chấm hoặc vết tím/đen không mất đi khi ấn, kèm sốt, cần được khám y tế khẩn cấp. Hãy đến cơ sở y tế/cấp cứu hoặc gọi 115. Ứng dụng dừng phân tích tại đây."
+  message_en: "Purple or dark spots that do not fade when pressed, together with fever, need urgent medical assessment. Go to a medical facility/emergency department or call 115. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+- id: U06
+  action: URGENT_MESSAGE
+  when: {all: [{fact: severe_pain_hot_red_spreading, eq: true}]}
+  message_vi: "Vùng da đau dữ dội, đỏ nóng và lan rộng cần được khám y tế khẩn cấp. Hãy đến cơ sở y tế/cấp cứu hoặc gọi 115. Ứng dụng dừng phân tích tại đây."
+  message_en: "Severe pain with hot, red, spreading skin needs urgent medical assessment. Go to a medical facility/emergency department or call 115. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+- id: U07
+  action: URGENT_MESSAGE
+  when: {all: [{fact: known_eczema, eq: true}, {fact: blisters, in: [some, many]}, {fact: fever, eq: true}]}
+  message_vi: "Nếu bạn đang có chàm mà đột ngột nổi nhiều mụn nước đau kèm sốt, cần được khám y tế ngay trong hôm nay. Hãy đến cơ sở y tế/cấp cứu hoặc gọi 115. Ứng dụng dừng phân tích tại đây."
+  message_en: "If you have eczema and suddenly develop many painful blisters with fever, you need medical assessment today. Go to a medical facility/emergency department or call 115. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+- id: U08
+  action: URGENT_MESSAGE
+  when: {all: [{fact: known_psoriasis, eq: true}, {fact: fever, eq: true}, {any: [{fact: pustules, eq: many}, {fact: spreading_rapidly, eq: true}, {fact: skin_peeling_or_raw_large, eq: true}]}]}
+  message_vi: "Khi đang có vảy nến mà da đỏ lan rộng nhanh hoặc nổi nhiều mụn mủ kèm sốt, cần được khám y tế khẩn cấp. Hãy đến cơ sở y tế/cấp cứu hoặc gọi 115. Ứng dụng dừng phân tích tại đây."
+  message_en: "If you have psoriasis and the skin turns red over large areas quickly or many pustules appear with fever, you need urgent medical assessment. Go to a medical facility/emergency department or call 115. The app stops its analysis here."
+  reviewed_by_clinician: false
+
+# ---------------- CLINICIAN_REVIEW: same_day ----------------
+- id: C01
+  action: CLINICIAN_REVIEW
+  timeframe: same_day
+  when: {all: [{fact: purple_nonblanching_spots, eq: true}]}
+  message_vi: "Chấm hoặc vết tím/đen không mất khi ấn nên được bác sĩ đánh giá trong ngày. Hãy liên hệ cơ sở y tế sớm."
+  message_en: "Purple or dark spots that do not fade when pressed should be assessed by a clinician the same day. Please contact a medical facility soon."
+  reviewed_by_clinician: false
+
+- id: C02
+  action: CLINICIAN_REVIEW
+  timeframe: same_day
+  when: {all: [{fact: red_streak_from_lesion, eq: true}]}
+  message_vi: "Vệt đỏ lan ra từ vùng tổn thương là dấu hiệu nên được bác sĩ đánh giá trong ngày."
+  message_en: "A red streak spreading from the lesion should be assessed by a clinician the same day."
+  reviewed_by_clinician: false
+
+- id: C03
+  action: CLINICIAN_REVIEW
+  timeframe: same_day
+  when: {all: [{fact: new_medication_recent, eq: true}, {any: [{fact: spreading_rapidly, eq: true}, {fact: fever, eq: true}]}]}
+  message_vi: "Phát ban mới xuất hiện sau khi bắt đầu thuốc mới, lan nhanh hoặc kèm sốt, nên được bác sĩ đánh giá trong ngày. Đừng tự ngưng hay đổi thuốc khi chưa hỏi bác sĩ/dược sĩ."
+  message_en: "A new rash after starting a new medicine that spreads quickly or comes with fever should be assessed the same day. Do not stop or change medicines before asking a doctor or pharmacist."
+  reviewed_by_clinician: false
+
+- id: C04
+  action: CLINICIAN_REVIEW
+  timeframe: same_day
+  when: {all: [{fact: one_sided_band, in: [some, many]}, {fact: blisters, in: [some, many]}, {any: [{fact: pain, in: [some, many]}, {fact: burning, in: [some, many]}]}]}
+  message_vi: "Dải mụn nước đau rát chỉ ở một bên cơ thể, nhất là gần mắt hoặc trên mặt, nên được bác sĩ đánh giá sớm trong ngày."
+  message_en: "A painful, burning band of blisters on one side of the body, especially near the eye or on the face, should be assessed early the same day."
+  reviewed_by_clinician: false
+
+# ---------------- CLINICIAN_REVIEW: soon ----------------
+- id: C05
+  action: CLINICIAN_REVIEW
+  timeframe: soon
+  when: {all: [{fact: oozing, in: [some, many]}, {fact: crusting, in: [some, many]}, {fact: pain, in: [some, many]}]}
+  message_vi: "Rỉ dịch, đóng mày kèm đau có thể là dấu hiệu da bị bội nhiễm. Nên để bác sĩ xem hồ sơ trong vài ngày tới."
+  message_en: "Oozing, crusting and pain can be signs of an infected rash. A clinician should review the record within the next few days."
+  reviewed_by_clinician: false
+
+- id: C06
+  action: CLINICIAN_REVIEW
+  timeframe: soon
+  when: {all: [{fact: lesion_changing_fast_or_ulcer, eq: true}]}
+  message_vi: "Tổn thương thay đổi nhanh, loét hoặc chảy máu nên được bác sĩ đánh giá sớm."
+  message_en: "A lesion that changes quickly, ulcerates or bleeds should be assessed by a clinician soon."
+  reviewed_by_clinician: false
+
+- id: C07
+  action: CLINICIAN_REVIEW
+  timeframe: soon
+  when: {all: [{fact: known_psoriasis, eq: true}, {fact: joint_pain_or_stiffness, eq: true}]}
+  message_vi: "Đau hoặc cứng khớp khi đang có vảy nến nên được bác sĩ đánh giá sớm."
+  message_en: "Joint pain or stiffness in someone with psoriasis should be assessed by a clinician soon."
+  reviewed_by_clinician: false
+
+- id: C08
+  action: CLINICIAN_REVIEW
+  timeframe: soon
+  when: {all: [{fact: immune_or_diabetes, eq: true}]}
+  message_vi: "Vì bạn có suy giảm miễn dịch hoặc đái tháo đường, nên để bác sĩ xem các triệu chứng da mới sớm hơn bình thường."
+  message_en: "Because you have a weakened immune system or diabetes, new skin symptoms should be reviewed by a clinician sooner than usual."
+  reviewed_by_clinician: false
+
+- id: C09
+  action: CLINICIAN_REVIEW
+  timeframe: soon
+  when: {all: [{fact: night_itch_contacts, in: [some, many]}]}
+  message_vi: "Ngứa nhiều về đêm kèm người sống cùng cũng ngứa nên được bác sĩ đánh giá sớm vì có thể lây cho người xung quanh."
+  message_en: "Intense night-time itch with others in the household also itching should be assessed soon because it can spread to people around you."
+  reviewed_by_clinician: false
+
+# ---------------- CLINICIAN_REVIEW: routine ----------------
+- id: C10
+  action: CLINICIAN_REVIEW
+  timeframe: routine
+  when: {all: [{fact: rash_lasting_over_2_weeks, eq: true}]}
+  message_vi: "Tình trạng kéo dài hơn 2 tuần mà chưa cải thiện nên được bác sĩ da liễu đánh giá."
+  message_en: "A skin problem that has lasted more than 2 weeks without improving should be assessed by a dermatologist."
+  reviewed_by_clinician: false
+
+- id: C11
+  action: CLINICIAN_REVIEW
+  timeframe: routine
+  when: {any: [{fact: image_status, in: [REVIEW, ABSTAIN]}]}
+  message_vi: "Hệ thống chưa đủ dữ liệu từ ảnh để phân tích chắc chắn. Bạn có thể chụp lại theo hướng dẫn hoặc nhờ bác sĩ xem hồ sơ."
+  message_en: "The app does not have enough reliable image data to analyse. You can retake the photo following the guide or ask a clinician to review the record."
+  reviewed_by_clinician: false
+
+- id: C12
+  action: CLINICIAN_REVIEW
+  timeframe: routine
+  when: {all: [{fact: not_comparable_count, gte: 3}]}
+  message_vi: "Nhiều lần chụp liên tiếp không so sánh được với nhau. Nên chụp lại đúng khung hướng dẫn hoặc nhờ bác sĩ xem."
+  message_en: "Several consecutive photos could not be compared. Retake photos using the same guide frame or ask a clinician to review."
+  reviewed_by_clinician: false
+
+- id: C13
+  action: CLINICIAN_REVIEW
+  timeframe: routine
+  when: {all: [{fact: profile_type, eq: other}]}
+  message_vi: "Hồ sơ 'tình trạng chưa rõ' luôn nên được bác sĩ xem để xác định hướng theo dõi."
+  message_en: "A record for an unclear skin problem should always be reviewed by a clinician to decide how to follow it."
+  reviewed_by_clinician: false

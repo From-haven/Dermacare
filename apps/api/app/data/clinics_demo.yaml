@@ -1,0 +1,62 @@
+demo_version: "demo-2026.11"
+is_synthetic: true
+city: "TP. Hồ Chí Minh"
+clinics:
+
+- slug: pk-demo-saigon-central
+  name: "Phòng khám DEMO Da Liễu Sài Gòn Central"
+  address_text: "100 Lê Lợi, Phường Bến Nghé, Quận 1, TP.HCM"
+  address_note: "Địa điểm mô phỏng trung tâm TP.HCM"
+  district: "Quận 1"
+  phone: "0901 000 001"
+  hours_note: "Mở cửa: 08:00 - 20:00 hàng ngày"
+  lat: 10.7736
+  lng: 106.7009
+  geocode_status: ok
+  listing_type: partner
+  verification_status: verified
+  partner_active: true
+  partner_days: 30
+
+- slug: pk-demo-cho-ray-area
+  name: "Phòng khám DEMO Da Liễu Chợ Lớn"
+  address_text: "50 Thuận Kiều, Phường 12, Quận 5, TP.HCM"
+  address_note: "Địa điểm mô phỏng khu vực Chợ Lớn"
+  district: "Quận 5"
+  phone: "0901 000 002"
+  hours_note: "Mở cửa: 07:30 - 19:30"
+  lat: 10.7562
+  lng: 106.6570
+  geocode_status: ok
+  listing_type: partner_candidate
+  verification_status: verified
+  partner_active: false
+
+- slug: pk-demo-phu-nhuan
+  name: "Phòng khám DEMO Da Liễu & Thẩm Mỹ Phú Nhuận"
+  address_text: "120 Phan Xích Long, Phường 2, Quận Phú Nhuận, TP.HCM"
+  address_note: "Địa điểm mô phỏng khu Phan Xích Long"
+  district: "Phú Nhuận"
+  phone: "0901 000 003"
+  hours_note: "Mở cửa: 08:30 - 20:30"
+  lat: 10.7981
+  lng: 106.6885
+  geocode_status: ok
+  listing_type: partner
+  verification_status: verified
+  partner_active: true
+  partner_days: 15
+
+- slug: pk-demo-thu-duc
+  name: "Phòng khám DEMO Da Liễu Thành Phố Thủ Đức"
+  address_text: "25 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP.HCM"
+  address_note: "Địa điểm mô phỏng khu vực Thủ Đức"
+  district: "Thành phố Thủ Đức"
+  phone: "0901 000 004"
+  hours_note: "Mở cửa: 08:00 - 17:30"
+  lat: 10.8512
+  lng: 106.7719
+  geocode_status: ok
+  listing_type: partner_candidate
+  verification_status: pending
+  partner_active: false

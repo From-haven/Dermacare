@@ -1,0 +1,46 @@
+id: psoriasis
+version: "v1.0"
+label_vi: "Theo dõi Vảy nến (Psoriasis)"
+label_en: "Psoriasis Follow-up"
+cadence_days_default: 7
+body_sites: [scalp, arms, legs, back, trunk_front, nails, hands, feet]
+disclaimer_vi: "Đây là trường theo dõi do nhóm thiết kế, KHÔNG phải thang đo đã xác thực. Không phải chẩn đoán."
+
+capture_guide:
+  overview: "Chụp bao quát vùng tổn thương (khuỷu tay, đầu gối, lưng) với ánh sáng tốt để thấy rõ bề mặt vảy bạc."
+  closeup: "Chụp sát bề mặt mảng vảy nến để đánh giá độ dày và mức độ đỏ nền."
+
+symptom_form:
+  fields:
+    - id: itch_score
+      type: range
+      min: 0
+      max: 10
+      label_vi: "Mức độ ngứa (0-10)"
+    - id: pain_score
+      type: range
+      min: 0
+      max: 10
+      label_vi: "Mức độ đau, căng rát da (0-10)"
+    - id: scaling_thickness
+      type: select
+      options: [0_none, 1_thin, 2_moderate, 3_thick]
+      label_vi: "Độ dày của lớp vảy trắng bạc"
+    - id: joint_pain_or_stiffness
+      type: bool
+      label_vi: "Có xuất hiện đau, sưng khớp hoặc cứng khớp buổi sáng không?"
+
+clinician_fields:
+  - id: bsa_percentage
+    label: "BSA % (Body Surface Area)"
+    type: float
+    provenance: clinician_entered
+  - id: pasi_score
+    label: "PASI Score (0-72)"
+    type: float
+    provenance: clinician_entered
+
+measurements_enabled:
+  - affected_area_ratio
+  - color_descriptor
+  - texture_descriptor

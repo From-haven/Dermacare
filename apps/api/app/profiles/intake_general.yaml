@@ -1,0 +1,207 @@
+id: intake_general
+version: "v1.0"
+label_vi: "Khai báo ban đầu (triệu chứng & vùng da)"
+label_en: "Initial Intake (Symptoms & Body Site)"
+disclaimer_vi: "Đây là trường theo dõi do nhóm thiết kế, KHÔNG phải thang đo đã xác thực. Không phải chẩn đoán."
+
+body_sites:
+  - id: site_face
+    label_vi: "Mặt"
+    label_en: "Face"
+  - id: site_scalp
+    label_vi: "Da đầu"
+    label_en: "Scalp"
+  - id: site_neck
+    label_vi: "Cổ"
+    label_en: "Neck"
+  - id: site_trunk_front
+    label_vi: "Ngực / Bụng"
+    label_en: "Chest / Abdomen"
+  - id: site_back
+    label_vi: "Lưng"
+    label_en: "Back"
+  - id: site_arms
+    label_vi: "Cánh tay"
+    label_en: "Arms"
+  - id: site_hands
+    label_vi: "Bàn tay / Ngón tay"
+    label_en: "Hands / Fingers"
+  - id: site_legs
+    label_vi: "Chân / Đùi"
+    label_en: "Legs / Thighs"
+  - id: site_feet
+    label_vi: "Bàn chân / Kẽ chân"
+    label_en: "Feet / Toes"
+  - id: site_folds
+    label_vi: "Nếp gấp (nách, bẹn, khuỷu, khoeo)"
+    label_en: "Skin folds (armpit, groin, elbow, knee)"
+  - id: site_nails
+    label_vi: "Móng"
+    label_en: "Nails"
+  - id: site_other
+    label_vi: "Vùng khác"
+    label_en: "Other"
+
+safety_questions:
+  - id: face_lip_swelling_or_breathing
+    type: bool
+    label_vi: "Bạn có bị sưng môi, mặt, mí mắt hoặc cảm thấy khó thở, khó nuốt không?"
+    label_en: "Do you have swelling of face/lips/eyelids or difficulty breathing/swallowing?"
+    urgent: true
+  - id: fever
+    type: bool
+    label_vi: "Bạn có đang bị sốt hoặc cảm thấy gai rét không?"
+    label_en: "Do you have a fever or chills?"
+  - id: spreading_rapidly
+    type: bool
+    label_vi: "Phát ban hoặc vết đỏ có lan rộng rất nhanh trong vòng 24–48 giờ qua không?"
+    label_en: "Is the rash or redness spreading very rapidly within the last 24–48 hours?"
+  - id: blisters_mucosa
+    type: bool
+    label_vi: "Có vết phồng rộp, lở loét ở vùng miệng, mắt hoặc cơ quan sinh dục không?"
+    label_en: "Are there blisters or sores around mouth, eyes, or genitals?"
+    urgent: true
+  - id: skin_peeling_or_raw_large
+    type: bool
+    label_vi: "Da có bị tróc từng mảng lớn hoặc trợt loét rỉ dịch trên diện rộng không?"
+    label_en: "Is skin peeling in large sheets or extensive raw oozing areas?"
+    urgent: true
+  - id: purple_nonblanching_spots
+    type: bool
+    label_vi: "Có đốm tím hoặc đen trên da mà khi ấn vào không mờ đi không?"
+    label_en: "Are there purple or dark spots that do not fade when pressed?"
+  - id: severe_pain_hot_red_spreading
+    type: bool
+    label_vi: "Vùng da có đau dữ dội, sưng đỏ, nóng rát và lan rộng nhanh không?"
+    label_en: "Is the skin severely painful, swollen, hot, and rapidly spreading?"
+    urgent: true
+  - id: red_streak_from_lesion
+    type: bool
+    label_vi: "Có vệt đỏ lan dài ra từ vùng tổn thương không?"
+    label_en: "Is there a red streak spreading outward from the lesion?"
+  - id: new_medication_recent
+    type: bool
+    label_vi: "Bạn có mới bắt đầu uống loại thuốc mới nào trong 2-4 tuần gần đây không?"
+    label_en: "Did you start any new medications within the past 2-4 weeks?"
+  - id: immune_or_diabetes
+    type: bool
+    label_vi: "Bạn có tiền sử đái tháo đường hoặc suy giảm miễn dịch không?"
+    label_en: "Do you have diabetes or an immunocompromised condition?"
+  - id: known_eczema
+    type: bool
+    label_vi: "Bạn đã từng được bác sĩ chẩn đoán Viêm da cơ địa (chàm) trước đây chưa?"
+    label_en: "Have you been previously diagnosed with eczema/atopic dermatitis?"
+  - id: known_psoriasis
+    type: bool
+    label_vi: "Bạn đã từng được bác sĩ chẩn đoán Vảy nến trước đây chưa?"
+    label_en: "Have you been previously diagnosed with psoriasis?"
+  - id: joint_pain_or_stiffness
+    type: bool
+    label_vi: "Bạn có bị đau, sưng hoặc cứng khớp không?"
+    label_en: "Do you experience joint pain, swelling, or morning stiffness?"
+  - id: lesion_changing_fast_or_ulcer
+    type: bool
+    label_vi: "Nốt da có thay đổi kích thước/màu sắc nhanh, hoặc loét chảy máu không?"
+    label_en: "Is the lesion changing rapidly in size/color, or ulcerating/bleeding?"
+  - id: rash_lasting_over_2_weeks
+    type: bool
+    label_vi: "Tình trạng này đã kéo dài liên tục hơn 2 tuần chưa cải thiện không?"
+    label_en: "Has this condition lasted for more than 2 weeks without improvement?"
+
+symptoms_28:
+  - id: itch
+    label_vi: "Cảm giác ngứa ngáy"
+    options: [none, some, many]
+  - id: redness
+    label_vi: "Vùng da đỏ, hồng hoặc sẫm màu"
+    options: [none, some, many]
+  - id: scaling
+    label_vi: "Bong vảy da, tróc vảy"
+    options: [none, some, many]
+  - id: dryness
+    label_vi: "Da khô ráp, sần sùi"
+    options: [none, some, many]
+  - id: oozing
+    label_vi: "Rỉ dịch ướt hoặc chảy nước vàng"
+    options: [none, some, many]
+  - id: crusting
+    label_vi: "Đóng mày, vảy tiết cứng"
+    options: [none, some, many]
+  - id: blisters
+    label_vi: "Mụn nước nhỏ hoặc bọng nước"
+    options: [none, some, many]
+  - id: pustules
+    label_vi: "Mụn mủ vàng hoặc trắng"
+    options: [none, some, many]
+  - id: papules
+    label_vi: "Nốt sẩn đỏ gồ lên bề mặt da"
+    options: [none, some, many]
+  - id: plaques
+    label_vi: "Mảng da dày cộm, nổi gờ rõ ranh giới"
+    options: [none, some, many]
+  - id: pain
+    label_vi: "Cảm giác đau tức hoặc chạm vào đau"
+    options: [none, some, many]
+  - id: burning
+    label_vi: "Cảm giác bỏng rát, châm chích"
+    options: [none, some, many]
+  - id: bleeding
+    label_vi: "Chảy máu do nứt nẻ hoặc gãi"
+    options: [none, some, many]
+  - id: cracking
+    label_vi: "Nứt nẻ da, kẽ da nứt sâu"
+    options: [none, some, many]
+  - id: spreading
+    label_vi: "Tổn thương có xu hướng lan rộng ra xung quanh"
+    options: [none, some, many]
+  - id: recurrent
+    label_vi: "Từng bị nhiều đợt tương tự trong quá khứ"
+    options: [none, some, many]
+  - id: ring_shape
+    label_vi: "Vết tổn thương có hình tròn hoặc vòng tròn viền nổi đỏ"
+    options: [none, some, many]
+  - id: wheals
+    label_vi: "Mảng sẩn phù gồ lên giống muỗi đốt, có thể lặn trong vài giờ"
+    options: [none, some, many]
+  - id: pale_patch
+    label_vi: "Mảng da nhạt màu hoặc mất sắc tố trắng bệch"
+    options: [none, some, many]
+  - id: dark_patch
+    label_vi: "Mảng da sẫm màu, sạm nâu hoặc xám"
+    options: [none, some, many]
+  - id: night_itch_contacts
+    label_vi: "Ngứa dữ dội vào ban đêm và người ngủ cùng cũng bị ngứa"
+    options: [none, some, many]
+  - id: one_sided_band
+    label_vi: "Tổn thương mọc thành dải dồn về một bên cơ thể"
+    options: [none, some, many]
+  - id: warty_surface
+    label_vi: "Bề mặt sần sùi thô ráp giống súp lơ hoặc mụn cóc"
+    options: [none, some, many]
+  - id: blackheads
+    label_vi: "Có nhân mụn đầu đen hoặc đầu trắng"
+    options: [none, some, many]
+  - id: contact_trigger
+    label_vi: "Xuất hiện sau khi tiếp xúc hoá chất, mỹ phẩm, trang sức kim loại"
+    options: [none, some, many]
+  - id: flushing
+    label_vi: "Vùng mặt dễ bị đỏ bừng từng cơn khi xúc động hoặc ra nắng"
+    options: [none, some, many]
+  - id: sweat_heat_trigger
+    label_vi: "Nặng lên rõ rệt khi trời nóng, ẩm hoặc ra mồ hôi nhiều"
+    options: [none, some, many]
+  - id: greasy_scale
+    label_vi: "Vảy nhờn dính màu vàng ở da đầu hoặc cánh mũi"
+    options: [none, some, many]
+
+onset_options:
+  - id: onset_lt3d
+    label_vi: "Dưới 3 ngày"
+  - id: onset_3_14d
+    label_vi: "Từ 3 đến 14 ngày"
+  - id: onset_2_8w
+    label_vi: "Từ 2 đến 8 tuần"
+  - id: onset_gt2m
+    label_vi: "Trên 2 tháng"
+  - id: onset_sudden
+    label_vi: "Xuất hiện đột ngột chỉ trong vài giờ"

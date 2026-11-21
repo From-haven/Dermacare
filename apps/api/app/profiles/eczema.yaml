@@ -1,0 +1,46 @@
+id: eczema
+version: "v1.0"
+label_vi: "Theo dõi Viêm da cơ địa / Chàm (Eczema)"
+label_en: "Atopic Dermatitis Follow-up"
+cadence_days_default: 3
+body_sites: [arms, hands, legs, folds, neck, face]
+disclaimer_vi: "Đây là trường theo dõi do nhóm thiết kế, KHÔNG phải thang đo đã xác thực. Không phải chẩn đoán."
+poem_enabled: false  # Cần con người cấp phép sử dụng POEM trước khi bật
+
+capture_guide:
+  overview: "Chụp bao quát vùng chi hoặc nếp gấp bị tổn thương, đặt thước đo hoặc chụp toàn vùng."
+  closeup: "Chụp cận cảnh mép tổn thương để thấy rõ vảy, nứt hoặc rỉ dịch."
+
+symptom_form:
+  fields:
+    - id: itch_score
+      type: range
+      min: 0
+      max: 10
+      label_vi: "Mức độ ngứa ngáy (0: không ngứa, 10: ngứa dữ dội không chịu nổi)"
+    - id: sleep_disturbance
+      type: range
+      min: 0
+      max: 10
+      label_vi: "Mất ngủ hoặc thức giấc do ngứa trong 3 ngày qua (0: không mất ngủ, 10: mất ngủ hoàn toàn)"
+    - id: dryness_severity
+      type: select
+      options: [0_none, 1_mild, 2_moderate, 3_severe]
+      label_vi: "Mức độ khô ráp của vùng da"
+    - id: oozing_crusting
+      type: bool
+      label_vi: "Có hiện tượng da rỉ dịch vàng hoặc đóng vảy mày ướt không?"
+    - id: cracking_bleeding
+      type: bool
+      label_vi: "Có vết nứt nẻ sâu gây chảy máu hoặc đau rát không?"
+
+clinician_fields:
+  - id: easi_score
+    label: "EASI Score (0-72)"
+    type: float
+    provenance: clinician_entered
+
+measurements_enabled:
+  - affected_area_ratio
+  - color_descriptor
+  - texture_descriptor

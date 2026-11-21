@@ -1,0 +1,21 @@
+# DermaCare Agent — Background Worker Dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir \
+    pillow \
+    pyyaml \
+    pyjwt \
+    cryptography \
+    bcrypt
+
+COPY . /app
+
+ENV PYTHONPATH="/app/apps/api:/app"
+
+CMD ["python", "apps/api/app/worker/jobs.py"]

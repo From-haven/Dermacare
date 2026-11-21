@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "make dev",
+      "type": "shell",
+      "command": "make dev",
+      "problemMatcher": []
+    },
+    {
+      "label": "make test",
+      "type": "shell",
+      "command": "make test",
+      "problemMatcher": []
+    }
+  ]
+}

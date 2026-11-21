@@ -1,0 +1,29 @@
+id: other
+version: "v1.0"
+label_vi: "Theo dõi Biểu hiện da khác (Chưa chẩn đoán)"
+label_en: "General Skin Observation (Undiagnosed)"
+cadence_days_default: 7
+body_sites: [face, scalp, neck, trunk_front, back, arms, hands, legs, feet, folds, nails, other]
+disclaimer_vi: "Hồ sơ 'tình trạng chưa rõ' luôn nên được bác sĩ xem để xác định hướng theo dõi. Không vẽ đường xu hướng (trend)."
+requires_clinician_review: true
+
+capture_guide:
+  overview: "Chụp toàn cảnh vùng da có biểu hiện bất thường cùng một vật chuẩn hoặc căn khung cố định."
+  closeup: "Chụp chi tiết vùng tổn thương, giữ khoảng cách đều nhau giữa các lần chụp."
+
+symptom_form:
+  fields:
+    - id: onset_date_approx
+      type: text
+      label_vi: "Thời điểm bắt đầu xuất hiện (khoảng ngày nào)"
+    - id: change_since_last
+      type: select
+      options: [none, larger, color_change, bleeding, painful, new_symptom]
+      label_vi: "Thay đổi nhận thấy so với lần ghi nhận trước"
+    - id: user_notes
+      type: textarea
+      label_vi: "Mô tả chi tiết cảm giác và diễn biến"
+
+measurements_enabled:
+  - affected_area_ratio
+  - color_descriptor

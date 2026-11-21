@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DermaCare Agent — Theo dõi tiến triển da liễu bảo tồn quyền riêng tư</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <!-- Leaflet CSS for maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+<body>
+  <!-- Non-Diagnostic Mandatory Banner -->
+  <div class="disclaimer-banner" id="global-disclaimer">
+    <span class="icon">⚠️</span>
+    <span><strong>LƯU Ý QUAN TRỌNG:</strong> Công cụ tham khảo & theo dõi tiến triển tổn thương da liễu, không phải chẩn đoán y khoa.</span>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <a href="#/" class="brand">
+      <div class="logo-icon">🌿</div>
+      <span>DermaCare Agent</span>
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <!-- Nav links rendered dynamically based on auth status -->
+    </nav>
+    <div class="user-controls" id="user-controls">
+      <!-- User profile & language switch rendered here -->
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="container" id="app-root">
+    <div style="text-align: center; padding: 60px 20px;">
+      <p style="color: #64748b;">Đang tải ứng dụng DermaCare Agent...</p>
+    </div>
+  </main>
+
+  <!-- Modal Container -->
+  <div id="modal-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

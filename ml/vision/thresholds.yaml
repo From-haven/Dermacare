@@ -1,0 +1,22 @@
+version: "v1.0-uncalibrated"
+status: UNCALIBRATED_DEFAULTS
+description: "Ngưỡng kiểm tra chất lượng ảnh mặc định theo Mục 9 Master Spec"
+
+quality:
+  sharpness:
+    retake_threshold: 60.0
+    review_threshold: 100.0
+  exposure:
+    extreme_dark_luminance: 12
+    extreme_bright_luminance: 243
+    retake_percentage: 25.0
+    review_percentage: 12.0
+  glare:
+    v_min: 240
+    s_max: 30
+    retake_percentage: 8.0
+  resolution:
+    min_short_dimension: 640
+  framing:
+    min_roi_ratio: 0.04
+    max_roi_ratio: 0.95
