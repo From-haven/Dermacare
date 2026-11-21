@@ -1,8 +1,10 @@
 """
 clinics.py — Clinic Management, GPS Haversine Distance, and Partner Subscription.
-Rules (Section 11 Master Spec):
+Rules:
 - Haversine distance from user lat/lng.
-- Order: (1) Verified Partner (partner_until > now) FIRST, (2) then distance ASC.
+- Returns 2 independent lists:
+  1. `nearby_clinics`: Public directory / non-partner hospitals & clinics sorted strictly by distance ASC (nearest to GPS first).
+  2. `partner_clinics`: Verified Partner clinics (partner_until > now) sorted strictly by distance ASC.
 - Verified Partner has "Đối tác xác thực — hiển thị ưu tiên theo gói đối tác" and button "Gửi hồ sơ & Tư vấn ngay".
 - Directory clinics: public directory only, NO partner label, NO consent button.
 - User GPS is NEVER stored in database. Log rounded to 2 decimals.
@@ -20,8 +22,8 @@ from app.config import CLINIC_SEARCH_MAX_RADIUS_KM, CLINIC_SEARCH_DEFAULT_RADIUS
 DIRECTORY_YAML = "apps/api/app/data/clinics_directory.yaml"
 DEMO_YAML = "apps/api/app/data/clinics_demo.yaml"
 
-def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Calculate the great circle distance between two points on the earth in km."""
+def _haversine_raw_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculate exact great-circle distance between two points on earth in km."""
     R = 6371.0  # Earth radius in kilometers
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
@@ -31,7 +33,11 @@ def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) ->
     a = math.sin(delta_phi / 2.0) ** 2 + \
         math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2.0) ** 2
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
-    return round(R * c, 2)
+    return R * c
+
+def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculate the great circle distance between two points on the earth in km (rounded to 2 decimals)."""
+    return round(_haversine_raw_km(lat1, lon1, lat2, lon2), 2)
 
 _clinics_synced = False
 
@@ -103,6 +109,34 @@ def sync_clinics(force: bool = False):
     db.commit()
     _clinics_synced = True
 
+def _build_clinic_item(r, raw_dist: float, now_iso: str) -> tuple:
+    """Build a normalized clinic dict and its partner flag."""
+    is_partner = bool(r["partner_until"] and r["partner_until"] > now_iso and r["listing_type"] == "partner")
+    item = {
+        "id": r["id"],
+        "name": r["name"],
+        "address_text": r["address_text"],
+        "address_note": r["address_note"],
+        "district": r["district"],
+        "phone": r["phone"],
+        "hours_note": r["hours_note"],
+        "lat": r["lat"],
+        "lng": r["lng"],
+        "distance_km": round(raw_dist, 2),
+        "listing_type": r["listing_type"],
+        "is_partner": is_partner,
+        "is_synthetic": bool(r["is_synthetic"]),
+    }
+    if is_partner:
+        item["partner_label"] = "Đối tác xác thực — hiển thị ưu tiên theo gói đối tác"
+        item["can_send_consent"] = True
+    else:
+        item["partner_label"] = None
+        item["can_send_consent"] = False
+        if r["listing_type"] == "directory":
+            item["public_note"] = "Thông tin công khai, vui lòng gọi điện xác nhận trước khi đến khám"
+    return item, is_partner
+
 def search_nearby_clinics(
     lat: float,
     lng: float,
@@ -110,12 +144,12 @@ def search_nearby_clinics(
     limit: int = 20,
     user_id: str = "guest",
     ip: str = "127.0.0.1"
-) -> list:
+) -> dict:
     """
     Search clinics near coordinates using haversine formula.
-    Sorting:
-      1. Verified Partner (partner_until > now) FIRST.
-      2. Distance in km ascending.
+    Returns 2 independent lists, each sorted strictly by nearest GPS distance ascending:
+      - nearby_clinics: Non-partner hospitals & clinics (distance ASC).
+      - partner_clinics: Verified partner clinics (distance ASC).
     """
     sync_clinics()
 
@@ -133,78 +167,41 @@ def search_nearby_clinics(
         """
     ).fetchall()
 
-    results = []
+    all_nearby = []
+    all_partners = []
     for r in rows:
-        d_km = haversine_distance_km(lat, lng, r["lat"], r["lng"])
-        if d_km <= radius_km:
-            is_partner = bool(r["partner_until"] and r["partner_until"] > now_iso and r["listing_type"] == "partner")
-            item = {
-                "id": r["id"],
-                "name": r["name"],
-                "address_text": r["address_text"],
-                "address_note": r["address_note"],
-                "district": r["district"],
-                "phone": r["phone"],
-                "hours_note": r["hours_note"],
-                "lat": r["lat"],
-                "lng": r["lng"],
-                "distance_km": d_km,
-                "listing_type": r["listing_type"],
-                "is_partner": is_partner,
-                "is_synthetic": bool(r["is_synthetic"])
-            }
+        raw_dist = _haversine_raw_km(lat, lng, r["lat"], r["lng"])
+        item, is_partner = _build_clinic_item(r, raw_dist, now_iso)
+        entry = (raw_dist, item["name"], item)
+        if is_partner:
+            all_partners.append(entry)
+        else:
+            all_nearby.append(entry)
 
-            if is_partner:
-                item["partner_label"] = "Đối tác xác thực — hiển thị ưu tiên theo gói đối tác"
-                item["can_send_consent"] = True
-            else:
-                item["partner_label"] = None
-                item["can_send_consent"] = False
-                if r["listing_type"] == "directory":
-                    item["public_note"] = "Thông tin công khai, vui lòng gọi điện xác nhận trước khi đến khám"
+    # Filter each list independently by radius_km; fall back to all verified entries in that category if none within radius
+    nearby_in_radius = [e for e in all_nearby if e[0] <= radius_km]
+    partners_in_radius = [e for e in all_partners if e[0] <= radius_km]
 
-            results.append(item)
+    nearby_pool = nearby_in_radius if nearby_in_radius else all_nearby
+    partner_pool = partners_in_radius if partners_in_radius else all_partners
 
-    # Fallback: if no clinics within radius_km (e.g. testing from other provinces/cities), calculate distance to all verified clinics
-    if not results:
-        for r in rows:
-            d_km = haversine_distance_km(lat, lng, r["lat"], r["lng"])
-            is_partner = bool(r["partner_until"] and r["partner_until"] > now_iso and r["listing_type"] == "partner")
-            item = {
-                "id": r["id"],
-                "name": r["name"],
-                "address_text": r["address_text"],
-                "address_note": r["address_note"],
-                "district": r["district"],
-                "phone": r["phone"],
-                "hours_note": r["hours_note"],
-                "lat": r["lat"],
-                "lng": r["lng"],
-                "distance_km": d_km,
-                "listing_type": r["listing_type"],
-                "is_partner": is_partner,
-                "is_synthetic": bool(r["is_synthetic"])
-            }
-            if is_partner:
-                item["partner_label"] = "Đối tác xác thực — hiển thị ưu tiên theo gói đối tác"
-                item["can_send_consent"] = True
-            else:
-                item["partner_label"] = None
-                item["can_send_consent"] = False
-                if r["listing_type"] == "directory":
-                    item["public_note"] = "Thông tin công khai, vui lòng gọi điện xác nhận trước khi đến khám"
-            results.append(item)
+    # Sort each list strictly by exact Haversine distance ASC (tie-break by name)
+    nearby_pool.sort(key=lambda e: (e[0], e[1]))
+    partner_pool.sort(key=lambda e: (e[0], e[1]))
 
-    # SORTING: (1) Partner first (is_partner=True first), (2) distance ascending
-    results.sort(key=lambda x: (0 if x["is_partner"] else 1, x["distance_km"]))
+    nearby_clinics = [e[2] for e in nearby_pool[:limit]]
+    partner_clinics = [e[2] for e in partner_pool[:limit]]
 
     # Audit logging: record rounded coordinates only (zero exact GPS in log)
     record_audit_event(user_id, "user", "search_nearby_clinics", "clinic", f"{round(lat, 2)},{round(lng, 2)}", "allow", ip)
 
-    return results[:limit]
+    return {
+        "nearby_clinics": nearby_clinics,
+        "partner_clinics": partner_clinics,
+    }
 
-def search_clinics_by_text(district: str = None, city: str = None, limit: int = 20) -> list:
-    """Manual fallback search when user denies GPS access."""
+def search_clinics_by_text(district: str = None, city: str = None, limit: int = 20) -> dict:
+    """Manual fallback search when user denies GPS access. Returns 2 independent lists."""
     sync_clinics()
     db = get_db()
     query = "SELECT * FROM clinics WHERE verification_status = 'verified'"
@@ -217,15 +214,15 @@ def search_clinics_by_text(district: str = None, city: str = None, limit: int = 
         query += " AND city LIKE ?"
         params.append(f"%{city}%")
 
-    query += " ORDER BY CASE WHEN partner_until IS NOT NULL THEN 0 ELSE 1 END, name ASC LIMIT ?"
-    params.append(limit)
+    query += " ORDER BY name ASC"
 
     rows = db.execute(query, tuple(params)).fetchall()
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    res = []
+    nearby_clinics = []
+    partner_clinics = []
     for r in rows:
         is_partner = bool(r["partner_until"] and r["partner_until"] > now_iso and r["listing_type"] == "partner")
-        res.append({
+        item = {
             "id": r["id"],
             "name": r["name"],
             "address_text": r["address_text"],
@@ -233,11 +230,20 @@ def search_clinics_by_text(district: str = None, city: str = None, limit: int = 
             "phone": r["phone"],
             "lat": r["lat"],
             "lng": r["lng"],
+            "listing_type": r["listing_type"],
             "is_partner": is_partner,
+            "partner_label": "Đối tác xác thực — hiển thị ưu tiên theo gói đối tác" if is_partner else None,
             "can_send_consent": is_partner,
-            "is_synthetic": bool(r["is_synthetic"])
-        })
-    return res
+            "is_synthetic": bool(r["is_synthetic"]),
+        }
+        if is_partner:
+            partner_clinics.append(item)
+        else:
+            nearby_clinics.append(item)
+    return {
+        "nearby_clinics": nearby_clinics[:limit],
+        "partner_clinics": partner_clinics[:limit],
+    }
 
 def purchase_partner_package(clinic_id: str, clinician_id: str, simulate_tx_status: str = "CONFIRMED", ip: str = "127.0.0.1") -> dict:
     """

@@ -42,7 +42,7 @@ def run_agent_workflow(
 
     # Node 2: Vision Observation
     measurements = []
-    if quality_status == "PASS" and image_bytes:
+    if quality_status in ("PASS", "REVIEW") and image_bytes:
         try:
             measurements = measure_observation(image_bytes, body_site=body_site, profile_type=profile_type)
         except Exception as e:

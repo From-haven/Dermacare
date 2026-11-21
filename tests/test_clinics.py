@@ -1,9 +1,10 @@
 """
-test_clinics.py — GPS Haversine Distance, Nearby Clinics Sorting, and Partner Subscriptions.
+test_clinics.py — GPS Haversine Distance, Dual Independent Clinic Lists, and Partner Subscriptions.
 Asserts:
 - Haversine distance calculation is accurate.
-- Nearby clinics sort Verified Partners FIRST even if further away.
-- Only verified clinics with valid coordinates are returned.
+- Nearby search returns 2 independent, disjoint lists: `nearby_clinics` and `partner_clinics`.
+- `nearby_clinics` contains only non-partner hospitals/clinics sorted strictly by nearest GPS distance ASC.
+- `partner_clinics` contains only verified partner clinics sorted strictly by nearest GPS distance ASC.
 - Non-partner directory clinics do not allow consent submission (can_send_consent=False).
 - Purchasing partner package with CONFIRMED transaction sets partner_until.
 - Purchasing with FAILED transaction leaves partner inactive (T10).
@@ -83,26 +84,57 @@ class TestClinics(unittest.TestCase):
         self.assertGreaterEqual(dist, 3.0)
         self.assertLessEqual(dist, 4.5)
 
-    def test_02_nearby_clinics_partner_sorted_first(self):
-        """Verified Partner clinics appear before non-partner clinics even if farther away."""
+    def test_02_nearby_clinics_two_independent_lists_sorted_by_distance(self):
+        """Nearby search returns 2 independent, disjoint lists each sorted strictly by nearest distance ASC."""
         # Query near District 1
-        clinics = search_nearby_clinics(lat=10.7725, lng=106.6980, radius_km=20.0)
-        self.assertGreater(len(clinics), 0)
+        res = search_nearby_clinics(lat=10.7725, lng=106.6980, radius_km=20.0)
+        self.assertIsInstance(res, dict)
+        self.assertIn("nearby_clinics", res)
+        self.assertIn("partner_clinics", res)
 
-        # Check partner ordering
-        partner_found = False
-        non_partner_started = False
-        for c in clinics:
-            if c["is_partner"]:
-                self.assertFalse(non_partner_started, "Partner clinic appeared after a non-partner clinic!")
-                self.assertIn("Đối tác xác thực", c["partner_label"])
-                self.assertTrue(c["can_send_consent"])
-                partner_found = True
-            else:
-                non_partner_started = True
-                self.assertFalse(c["can_send_consent"])
+        nearby = res["nearby_clinics"]
+        partners = res["partner_clinics"]
+        self.assertGreater(len(nearby), 0)
+        self.assertGreater(len(partners), 0)
 
-        self.assertTrue(partner_found)
+        # Verify nearby_clinics are all non-partner and strictly sorted by distance ASC
+        nearby_distances = []
+        for c in nearby:
+            self.assertFalse(c["is_partner"], "Partner clinic should not appear in nearby_clinics list!")
+            self.assertFalse(c["can_send_consent"])
+            nearby_distances.append(c["distance_km"])
+        self.assertEqual(nearby_distances, sorted(nearby_distances), "nearby_clinics must be sorted nearest first!")
+
+        # Verify partner_clinics are all verified partners and strictly sorted by distance ASC
+        partner_distances = []
+        for c in partners:
+            self.assertTrue(c["is_partner"], "Non-partner clinic should not appear in partner_clinics list!")
+            self.assertIn("Đối tác xác thực", c["partner_label"])
+            self.assertTrue(c["can_send_consent"])
+            partner_distances.append(c["distance_km"])
+        self.assertEqual(partner_distances, sorted(partner_distances), "partner_clinics must be sorted nearest first!")
+
+        # Verify the 2 lists are completely disjoint
+        nearby_ids = {c["id"] for c in nearby}
+        partner_ids = {c["id"] for c in partners}
+        self.assertEqual(nearby_ids.intersection(partner_ids), set())
+
+    def test_02b_nearest_hospital_matches_gps_location(self):
+        """The #1 clinic in nearby_clinics must be the geographically closest hospital to the user's GPS."""
+        # Near BV FV (Quận 7: 10.7303, 106.7218)
+        res_q7 = search_nearby_clinics(lat=10.7305, lng=106.7220, radius_km=20.0)
+        self.assertIn("FV", res_q7["nearby_clinics"][0]["name"])
+        self.assertLess(res_q7["nearby_clinics"][0]["distance_km"], 0.5)
+
+        # Near BV Da liễu TP.HCM (Quận 3: 10.7782, 106.6853)
+        res_q3 = search_nearby_clinics(lat=10.7783, lng=106.6854, radius_km=20.0)
+        self.assertIn("Bệnh viện Da liễu TP.HCM", res_q3["nearby_clinics"][0]["name"])
+        self.assertLess(res_q3["nearby_clinics"][0]["distance_km"], 0.5)
+
+        # Near BV Đại học Y Dược TP.HCM (Quận 5: 10.7554, 106.6586)
+        res_q5 = search_nearby_clinics(lat=10.7554, lng=106.6586, radius_km=20.0)
+        self.assertIn("Đại học Y Dược", res_q5["nearby_clinics"][0]["name"])
+        self.assertLess(res_q5["nearby_clinics"][0]["distance_km"], 0.5)
 
     def test_03_partner_purchase_confirmed_activates(self):
         """Purchasing partner package with CONFIRMED transaction activates partner_until."""

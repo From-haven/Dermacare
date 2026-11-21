@@ -3,13 +3,8 @@
  * Strict adherence to MASTER_SPEC Section 16 (Screens, States, UX, Privacy & Medical Safety)
  */
 
-// Global State
-const STATE = {
-  token: localStorage.getItem("dc_token") || null,
-  user: JSON.parse(localStorage.getItem("dc_user") || "null"),
-  lang: localStorage.getItem("dc_lang") || "vi",
-  currentCase: null,
-  wizard: {
+function createInitialWizardState() {
+  return {
     step: 1,
     site: "face",
     profileType: "other",
@@ -24,7 +19,20 @@ const STATE = {
     selectedClinic: null,
     consentScope: "full",
     consentDuration: 30
-  }
+  };
+}
+
+// Global State
+const STATE = {
+  token: localStorage.getItem("dc_token") || null,
+  user: JSON.parse(localStorage.getItem("dc_user") || "null"),
+  lang: localStorage.getItem("dc_lang") || "vi",
+  currentCase: null,
+  wizard: createInitialWizardState()
+};
+
+window.resetWizardState = () => {
+  STATE.wizard = createInitialWizardState();
 };
 
 // I18N Dictionary
@@ -277,31 +285,67 @@ function BodyMap(selectedSite, onSelect) {
 }
 
 // -------------------------------------------------------------
-// Component 6: ClinicCard
+// Component 6: ClinicCard & Dual Clinic Lists
 // -------------------------------------------------------------
-function ClinicCard(clinic) {
-  const isPartner = clinic.listing_type === "partner" || clinic.partner_active;
+function ClinicCard(clinic, rank = null) {
+  const isPartner = Boolean(clinic.is_partner || clinic.listing_type === "partner" || clinic.partner_active);
+  const safeName = String(clinic.name || "").replace(/'/g, "\\'");
+  const rankBadge = (!isPartner && rank === 1)
+    ? '<span style="font-size:0.75rem; font-weight:700; color:#0369a1; background:#e0f2fe; border:1px solid #7dd3fc; padding:2px 7px; border-radius:4px;">📍 Gần nhất</span>'
+    : (!isPartner && rank !== null)
+      ? `<span style="font-size:0.75rem; font-weight:600; color:#475569; background:#f1f5f9; padding:2px 6px; border-radius:4px;">#${rank}</span>`
+      : '';
   return `
     <div class="clinic-card ${isPartner ? 'partner-highlight' : ''}">
       <div>
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+          ${rankBadge}
           <h4 style="font-size:1.05rem; font-weight:600;">${clinic.name}</h4>
           ${isPartner ? '<span class="badge-partner">★ VERIFIED PARTNER</span>' : '<span style="font-size:0.75rem; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">Danh bạ công khai</span>'}
         </div>
-        ${isPartner ? '<p style="font-size:0.8125rem; font-weight:600; color:#15803d; margin-bottom:4px;">Đối tác xác thực — hiển thị ưu tiên theo gói đối tác</p>' : ''}
+        ${isPartner ? '<p style="font-size:0.8125rem; font-weight:600; color:#15803d; margin-bottom:4px;">Đối tác xác thực — hỗ trợ gửi hồ sơ & tư vấn trực tuyến</p>' : ''}
         <p style="font-size:0.875rem; color:#475569;">📍 ${clinic.address_text || clinic.address || 'TP. Hồ Chí Minh'}</p>
         <p style="font-size:0.8125rem; color:#64748b;">📞 ${clinic.phone || 'Chưa cập nhật'} | Giờ khám: ${clinic.hours || clinic.hours_note || '8:00 - 17:00'}</p>
-        ${clinic.distance_km !== undefined ? `<p style="font-size:0.8125rem; font-weight:600; color:#0284c7; margin-top:4px;">Khoảng cách ước tính: ${Number(clinic.distance_km).toFixed(1)} km</p>` : ''}
+        ${clinic.distance_km !== undefined ? `<p style="font-size:0.8125rem; font-weight:600; color:#0284c7; margin-top:4px;">Khoảng cách ước tính: ${Number(clinic.distance_km).toFixed(2)} km</p>` : ''}
       </div>
       <div>
         ${isPartner ? `
-          <button class="btn btn-primary btn-sm" onclick="window.selectClinicForConsent('${clinic.id}')">
+          <button class="btn btn-primary btn-sm" onclick="window.selectClinicForConsent('${clinic.id}', '${safeName}')">
             Chọn phòng khám & Gửi hồ sơ
           </button>
         ` : `
           <span style="font-size:0.75rem; color:#94a3b8; font-style:italic;">Chỉ liên hệ trực tiếp</span>
         `}
       </div>
+    </div>
+  `;
+}
+
+function renderClinicSections(nearbyClinics = [], partnerClinics = []) {
+  const nearbyHtml = nearbyClinics.length
+    ? nearbyClinics.map((c, idx) => ClinicCard(c, idx + 1)).join("")
+    : `<p style="color:#64748b; font-size:0.875rem;">Không tìm thấy bệnh viện / cơ sở y tế nào phù hợp.</p>`;
+
+  const partnerHtml = partnerClinics.length
+    ? partnerClinics.map(c => ClinicCard(c)).join("")
+    : `<p style="color:#64748b; font-size:0.875rem;">Hiện chưa có phòng khám đối tác hợp tác trong khu vực.</p>`;
+
+  return `
+    <div class="clinic-section" id="nearby-clinics-section" style="margin-bottom:24px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #e0f2fe;">
+        <h4 style="font-size:1rem; font-weight:700; color:#0369a1; margin:0;">🏥 Bệnh viện & Cơ sở y tế gần nhất (theo khoảng cách GPS)</h4>
+        <span style="font-size:0.75rem; font-weight:600; color:#0369a1; background:#e0f2fe; padding:2px 8px; border-radius:12px;">${nearbyClinics.length} cơ sở</span>
+      </div>
+      ${nearbyHtml}
+    </div>
+
+    <div class="clinic-section" id="partner-clinics-section">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #fde68a;">
+        <h4 style="font-size:1rem; font-weight:700; color:#b45309; margin:0;">★ Đối tác hợp tác (Verified Partner)</h4>
+        <span style="font-size:0.75rem; font-weight:600; color:#b45309; background:#fef3c7; padding:2px 8px; border-radius:12px;">${partnerClinics.length} đối tác</span>
+      </div>
+      <p style="font-size:0.8125rem; color:#64748b; margin-bottom:10px;">Danh sách riêng các phòng khám đối tác hỗ trợ tiếp nhận hồ sơ trực tuyến (sắp xếp theo khoảng cách gần nhất).</p>
+      ${partnerHtml}
     </div>
   `;
 }
@@ -1380,7 +1424,12 @@ window.evaluateImageQuality = (canvas, ctx) => {
   };
 };
 
+let isAnalyzingWizardImage = false;
+
 window.analyzeWizardImage = async (dataUrl) => {
+  if (isAnalyzingWizardImage) return;
+  isAnalyzingWizardImage = true;
+
   const qArea = document.getElementById("quality-card-area");
   if (qArea) {
     qArea.innerHTML = `
@@ -1399,6 +1448,9 @@ window.analyzeWizardImage = async (dataUrl) => {
       symptoms: STATE.wizard.symptoms || {},
       onset: STATE.wizard.onset || "onset_3_14d"
     };
+    if (STATE.wizard.caseId) {
+      payload.case_id = STATE.wizard.caseId;
+    }
 
     const res = await apiCall("/api/wizard/analyze", "POST", payload);
 
@@ -1445,6 +1497,8 @@ window.analyzeWizardImage = async (dataUrl) => {
         </div>
       `;
     }
+  } finally {
+    isAnalyzingWizardImage = false;
   }
 };
 
@@ -1577,8 +1631,12 @@ window.loadClinicsMap = async (lat = 10.7769, lng = 106.7009, isDevice = false) 
   if (!mapContainer || !listArea) return;
 
   try {
-    const list = await apiCall(`/api/clinics/nearby?lat=${lat}&lng=${lng}&radius_km=30`);
-    listArea.innerHTML = list.map(c => ClinicCard(c)).join("");
+    const res = await apiCall(`/api/clinics/nearby?lat=${lat}&lng=${lng}&radius_km=30`);
+    const nearbyClinics = Array.isArray(res) ? res.filter(c => !c.is_partner) : (res.nearby_clinics || []);
+    const partnerClinics = Array.isArray(res) ? res.filter(c => c.is_partner) : (res.partner_clinics || []);
+    const allClinics = [...nearbyClinics, ...partnerClinics];
+
+    listArea.innerHTML = renderClinicSections(nearbyClinics, partnerClinics);
 
     if (window.L) {
       if (leafletMapInstance) {
@@ -1599,12 +1657,12 @@ window.loadClinicsMap = async (lat = 10.7769, lng = 106.7009, isDevice = false) 
       });
       L.marker([lat, lng], { icon: userIcon }).addTo(leafletMapInstance).bindPopup(`<strong>${isDevice ? 'Vị trí thiết bị của bạn' : 'Vị trí tìm kiếm'}</strong><br>Vĩ độ: ${lat.toFixed(4)}, Kinh độ: ${lng.toFixed(4)}`).openPopup();
 
-      // Markers for clinics
-      list.forEach(c => {
+      // Markers for clinics (both nearby hospitals and partners)
+      allClinics.forEach(c => {
         if (c.lat && c.lng) {
           const marker = L.marker([c.lat, c.lng]).addTo(leafletMapInstance);
-          const partnerBadge = c.is_partner ? '<span style="color:#16a34a; font-weight:bold;">★ VERIFIED PARTNER</span><br>' : '';
-          const distStr = c.distance_km !== undefined ? `<br>Khoảng cách: <strong>${c.distance_km.toFixed(1)} km</strong>` : '';
+          const partnerBadge = c.is_partner ? '<span style="color:#b45309; font-weight:bold;">★ ĐỐI TÁC HỢP TÁC (VERIFIED PARTNER)</span><br>' : '<span style="color:#0369a1; font-weight:bold;">🏥 BỆNH VIỆN / CƠ SỞ Y TẾ</span><br>';
+          const distStr = c.distance_km !== undefined ? `<br>Khoảng cách: <strong>${Number(c.distance_km).toFixed(2)} km</strong>` : '';
           marker.bindPopup(`<strong>${c.name}</strong><br>${partnerBadge}${c.address_text || ''}${distStr}`);
         }
       });
@@ -1614,8 +1672,8 @@ window.loadClinicsMap = async (lat = 10.7769, lng = 106.7009, isDevice = false) 
   }
 };
 
-window.selectClinicForConsent = (clinicId) => {
-  STATE.wizard.selectedClinic = { id: clinicId, name: "Phòng khám Da liễu Sài Gòn (Verified Partner)" };
+window.selectClinicForConsent = (clinicId, clinicName = "") => {
+  STATE.wizard.selectedClinic = { id: clinicId, name: clinicName || "Phòng khám Da liễu Sài Gòn (Verified Partner)" };
   STATE.wizard.step = 6;
   renderApp();
 };
@@ -1623,13 +1681,17 @@ window.selectClinicForConsent = (clinicId) => {
 // -------------------------------------------------------------
 // Step 6: Finalize Wizard (Blockchain Avalanche Consent)
 // -------------------------------------------------------------
+let isFinalizingWizard = false;
+
 window.finalizeWizard = async () => {
+  if (isFinalizingWizard) return;
   if (!STATE.token) {
     alert("Vui lòng đăng nhập tài khoản để lưu hồ sơ và kích hoạt ủy quyền chia sẻ.");
     navigate("/login");
     return;
   }
 
+  isFinalizingWizard = true;
   const scopeVal = document.getElementById("consent-scope")?.value || "full";
   const daysVal = parseInt(document.getElementById("consent-expiry")?.value || "30", 10);
   const clinicId = STATE.wizard.selectedClinic?.id || "clinic-sg-01";
@@ -1665,9 +1727,12 @@ window.finalizeWizard = async () => {
     });
 
     alert(`Xác lập ủy quyền thành công!\nTxHash Avalanche: ${consentRes.tx_hash}\nCam kết không PII: ${consentRes.commitment.slice(0, 16)}...`);
+    window.resetWizardState();
     navigate(`/cases/${caseId}`);
   } catch (err) {
     alert(`Lỗi xác lập ủy quyền: ${err.message}`);
+  } finally {
+    isFinalizingWizard = false;
   }
 };
 
@@ -1678,7 +1743,7 @@ async function renderCasesView(root) {
   root.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
       <h2>Hồ Sơ Theo Dõi Của Tôi</h2>
-      <a href="#/start" class="btn btn-primary">+ Tạo đợt theo dõi mới</a>
+      <a href="#/start" class="btn btn-primary" onclick="window.resetWizardState()">+ Tạo đợt theo dõi mới</a>
     </div>
     <div id="cases-content">
       <p style="color:#64748b;">Đang tải danh sách hồ sơ...</p>
@@ -1804,10 +1869,36 @@ async function renderTimelineView(root, caseId) {
         </p>
 
         ${tl.can_draw_trend ? MetricChart(points, "Diện tích tổn thương ước lượng", "%") : `
-          <div class="card" style="text-align:center; padding:32px 16px; background:#fafafa;">
+          <div class="card" style="text-align:center; padding:24px 16px; background:#fafafa; margin-bottom:16px;">
             <p style="color:#64748b;">${tl.trend_summary || 'Chưa đủ 3 mốc quan sát đạt tiêu chuẩn để vẽ đường xu hướng.'}</p>
           </div>
         `}
+
+        ${points.length > 0 ? `
+          <div style="margin-top:16px;">
+            <h4 style="margin-bottom:8px; font-size:0.95rem;">Các điểm đo đã ghi nhận (${points.length} mốc):</h4>
+            <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+              <thead>
+                <tr style="background:#f1f5f9; text-align:left;">
+                  <th style="padding:8px; border:1px solid #e2e8f0;">Thời điểm</th>
+                  <th style="padding:8px; border:1px solid #e2e8f0;">Chỉ số (${tl.metric_name || 'affected_area_ratio'})</th>
+                  <th style="padding:8px; border:1px solid #e2e8f0;">Tương thích</th>
+                  <th style="padding:8px; border:1px solid #e2e8f0;">Nguồn</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${points.map(p => `
+                  <tr>
+                    <td style="padding:8px; border:1px solid #e2e8f0;">${p.captured_at ? p.captured_at.replace('T', ' ').slice(0, 19) : ''}</td>
+                    <td style="padding:8px; border:1px solid #e2e8f0;"><strong>${p.value !== null && p.value !== undefined ? Number(p.value).toFixed(2) : 'N/A'}</strong></td>
+                    <td style="padding:8px; border:1px solid #e2e8f0;">${ComparabilityBadge(p.comparability || "COMPARABLE")}</td>
+                    <td style="padding:8px; border:1px solid #e2e8f0;">${ProvenanceBadge(p.provenance || "ai_measured")}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
 
         <div style="margin-top:20px; padding:12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; font-size:0.8125rem; color:#475569;">
           <strong>Quy tắc so sánh (Mục 11):</strong> Nếu hình ảnh chụp khác góc chụp hoặc khác điều kiện ánh sáng vượt ngưỡng cho phép, hệ thống sẽ gắn nhãn <em>Không thể so sánh</em> và ngừng tính toán độ chênh lệch để đảm bảo tính an toàn y học.
@@ -1933,23 +2024,69 @@ window.revokeConsent = async (consentId) => {
 // -------------------------------------------------------------
 async function renderClinicsView(root) {
   root.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
       <h2>Danh Bạ Cơ Sở Da Liễu Chuyên Khoa</h2>
-      <button class="btn btn-outline btn-sm" onclick="renderClinicsView(document.getElementById('app-root'))">Làm mới vị trí</button>
+      <button class="btn btn-outline btn-sm" onclick="STATE.deviceGps = null; renderClinicsView(document.getElementById('app-root'))">📍 Làm mới vị trí GPS</button>
+    </div>
+    <div id="clinics-page-gps" style="margin-bottom:16px; padding:10px 14px; border-radius:8px; background:#f0fdf4; border:1px solid #86efac; font-size:0.875rem; color:#166534;">
+      📡 Đang lấy toạ độ GPS thiết bị để sắp xếp bệnh viện gần nhất...
     </div>
     <div id="clinics-page-list">
       <p style="color:#64748b;">Đang tải danh bạ phòng khám...</p>
     </div>
   `;
-  try {
-    const list = await apiCall("/api/clinics/nearby?lat=10.7769&lng=106.7009&radius_km=15");
-    const area = document.getElementById("clinics-page-list");
-    area.innerHTML = list.map(c => ClinicCard(c)).join("");
-  } catch (err) {
-    document.getElementById("clinics-page-list").innerHTML = `
-      ${ClinicCard({ id: "c1", name: "Phòng khám Da liễu Sài Gòn", listing_type: "partner", partner_active: true, distance_km: 1.2, address: "Quận 1, TP.HCM", phone: "028 3829 xxxx" })}
-      ${ClinicCard({ id: "c2", name: "Bệnh viện Da liễu TP.HCM", listing_type: "directory", distance_km: 3.5, address: "Quận 3, TP.HCM", phone: "028 3930 8131" })}
-    `;
+
+  const fetchAndRender = async (lat, lng, isDevice) => {
+    const gpsBanner = document.getElementById("clinics-page-gps");
+    if (gpsBanner) {
+      if (isDevice) {
+        gpsBanner.innerHTML = `🟢 <strong>Vị trí GPS thiết bị:</strong> ${lat.toFixed(4)}, ${lng.toFixed(4)}. Bệnh viện được liệt kê theo tiêu chí gần nhất.`;
+        gpsBanner.style.background = "#f0fdf4";
+        gpsBanner.style.borderColor = "#86efac";
+        gpsBanner.style.color = "#166534";
+      } else {
+        gpsBanner.innerHTML = `⚠️ Không lấy được GPS thiết bị, đang dùng toạ độ trung tâm TP.HCM (${lat.toFixed(4)}, ${lng.toFixed(4)}).`;
+        gpsBanner.style.background = "#fefce8";
+        gpsBanner.style.borderColor = "#fef08a";
+        gpsBanner.style.color = "#854d0e";
+      }
+    }
+    try {
+      const res = await apiCall(`/api/clinics/nearby?lat=${lat}&lng=${lng}&radius_km=30`);
+      const nearbyClinics = Array.isArray(res) ? res.filter(c => !c.is_partner) : (res.nearby_clinics || []);
+      const partnerClinics = Array.isArray(res) ? res.filter(c => c.is_partner) : (res.partner_clinics || []);
+      const area = document.getElementById("clinics-page-list");
+      if (area) {
+        area.innerHTML = renderClinicSections(nearbyClinics, partnerClinics);
+      }
+    } catch (err) {
+      const area = document.getElementById("clinics-page-list");
+      if (area) {
+        area.innerHTML = renderClinicSections(
+          [{ id: "c2", name: "Bệnh viện Da liễu TP.HCM", listing_type: "directory", is_partner: false, distance_km: 3.5, address_text: "Quận 3, TP.HCM", phone: "028 3930 8131" }],
+          [{ id: "c1", name: "Phòng khám Da liễu Sài Gòn", listing_type: "partner", is_partner: true, partner_active: true, distance_km: 1.2, address_text: "Quận 1, TP.HCM", phone: "028 3829 xxxx" }]
+        );
+      }
+    }
+  };
+
+  if (STATE.deviceGps) {
+    await fetchAndRender(STATE.deviceGps.lat, STATE.deviceGps.lng, true);
+  } else if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        STATE.deviceGps = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          acc: Math.round(pos.coords.accuracy || 10)
+        };
+        fetchAndRender(STATE.deviceGps.lat, STATE.deviceGps.lng, true);
+      },
+      () => fetchAndRender(10.7769, 106.7009, false),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  } else {
+    await fetchAndRender(10.7769, 106.7009, false);
   }
 }
 

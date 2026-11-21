@@ -278,7 +278,7 @@ class DermaCareHandler(BaseHTTPRequestHandler):
                 SELECT o.id, o.captured_at, vm.metric_name, vm.value, c.flag as comp_flag
                 FROM observations o
                 LEFT JOIN visual_measurements vm ON o.id = vm.observation_id AND vm.metric_name = ?
-                LEFT JOIN comparisons c ON o.id = c.obs_b_id
+                LEFT JOIN comparisons c ON o.id = c.obs_to
                 WHERE o.case_id = ?
                 ORDER BY o.captured_at ASC
                 """,
@@ -568,23 +568,37 @@ class DermaCareHandler(BaseHTTPRequestHandler):
                 try:
                     db = get_db()
                     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                    # Ensure case exists
-                    case_row = db.execute("SELECT id FROM cases WHERE id = ?", (case_id,)).fetchone()
+                    # Ensure case exists (reuse existing case for this wizard session to prevent duplicates)
+                    case_row = db.execute("SELECT id, patient_id FROM cases WHERE id = ?", (case_id,)).fetchone()
                     if not case_row:
+                        title = f"Theo dõi vùng da {body_site}"
                         db.execute(
-                            "INSERT INTO cases (id, patient_id, profile_type, body_site, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'active', ?, ?)",
-                            (case_id, uid, profile_type, body_site, now_iso, now_iso)
+                            "INSERT INTO cases (id, patient_id, profile_type, title, body_site, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'active', ?, ?)",
+                            (case_id, uid, profile_type, title, body_site, now_iso, now_iso)
                         )
+                    elif case_row["patient_id"] == uid:
+                        db.execute(
+                            "UPDATE cases SET profile_type = ?, body_site = ?, updated_at = ? WHERE id = ?",
+                            (profile_type, body_site, now_iso, case_id)
+                        )
+                    # Ensure unique observation_id if user retries upload in the same wizard session
+                    if db.execute("SELECT id FROM observations WHERE id = ?", (obs_id,)).fetchone():
+                        obs_id = str(uuid.uuid4())
                     # Create observation
                     db.execute(
                         "INSERT INTO observations (id, case_id, captured_at, workflow_state, created_at, updated_at) VALUES (?, ?, ?, 'ANALYZED', ?, ?)",
                         (obs_id, case_id, now_iso, now_iso, now_iso)
                     )
-                    # Upload image asset
-                    img_res = images.upload_observation_image(uid, obs_id, img_bytes, view_type="overview", ip=ip)
-                    workflow_res["image_id"] = img_res["image_id"]
+                    db.commit()
 
-                    # Persist measurements
+                    # Upload image asset (non-fatal if duplicate sample image or privacy not yet accepted)
+                    try:
+                        img_res = images.upload_observation_image(uid, obs_id, img_bytes, view_type="overview", ip=ip)
+                        workflow_res["image_id"] = img_res["image_id"]
+                    except Exception as img_err:
+                        workflow_res["image_save_warning"] = str(img_err)
+
+                    # Persist measurements (always save even if image upload returned warning)
                     for m in workflow_res.get("measurements", []):
                         db.execute(
                             """
@@ -594,7 +608,7 @@ class DermaCareHandler(BaseHTTPRequestHandler):
                             (str(uuid.uuid4()), obs_id, m["metric_name"], m["value"], m["unit"], m["confidence"], m["model_version"], m["provenance"], json.dumps(m.get("details", {})), now_iso, now_iso)
                         )
 
-                    # Persist similar conditions
+                    # Persist similar conditions (always save even if image upload returned warning)
                     sim_items = workflow_res.get("similar_conditions", {}).get("items", [])
                     db.execute(
                         """
