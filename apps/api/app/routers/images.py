@@ -141,14 +141,47 @@ def upload_observation_image(user_id: str, observation_id: str, raw_bytes: bytes
     }
 
 def request_image_token(user_id: str, image_id: str, ip: str = "127.0.0.1") -> dict:
-    """Generate short-lived 60-second token for viewing encrypted image."""
+    """
+    Generate short-lived 60-second token for viewing encrypted image.
+    Enforces Section 7 & Fix-06:
+    - Patient: must be case owner.
+    - Clinician: must have active consent with 'images' scope and active partner clinic.
+    - Admin: 403 Forbidden (Admin never accesses raw medical images).
+    """
     db = get_db()
-    img = db.execute("SELECT * FROM image_assets WHERE id = ?", (image_id,)).fetchone()
-    if not img:
+    row = db.execute(
+        """
+        SELECT ia.*, o.case_id, c.patient_id
+        FROM image_assets ia
+        JOIN observations o ON ia.observation_id = o.id
+        JOIN cases c ON o.case_id = c.id
+        WHERE ia.id = ?
+        """,
+        (image_id,)
+    ).fetchone()
+    if not row:
         raise NotFoundException("Ảnh không tồn tại")
 
+    user_row = db.execute("SELECT role FROM users WHERE id = ?", (user_id,)).fetchone()
+    user_role = user_row["role"] if user_row else "patient"
+
+    if user_role == "admin":
+        record_audit_event(user_id, "admin", "request_image_token", "image", image_id, "deny", ip)
+        raise ForbiddenException("Quản trị viên không được phép truy cập hình ảnh y tế")
+
+    if user_role == "patient":
+        if row["patient_id"] != user_id:
+            record_audit_event(user_id, "patient", "request_image_token", "image", image_id, "deny", ip)
+            raise ForbiddenException("Bạn không có quyền xem ảnh của hồ sơ này")
+    elif user_role == "clinician":
+        from app.core.rbac import check_clinician_has_consent
+        check_clinician_has_consent(user_id, row["case_id"], required_scope_item="images", ip=ip)
+    else:
+        record_audit_event(user_id, user_role, "request_image_token", "image", image_id, "deny", ip)
+        raise ForbiddenException("Không có quyền truy cập ảnh")
+
     token = create_image_token(image_id, user_id, lifetime_seconds=60)
-    record_audit_event(user_id, "user", "request_image_token", "image", image_id, "allow", ip)
+    record_audit_event(user_id, user_role, "request_image_token", "image", image_id, "allow", ip)
     return {"image_id": image_id, "token": token, "expires_in_seconds": 60}
 
 def get_image_content(image_id: str, token: str, ip: str = "127.0.0.1") -> tuple:

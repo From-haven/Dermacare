@@ -2,8 +2,12 @@
 measure.py — Heuristic Vision Measurements and Safety Wrappers.
 Provides:
 - affected_area_ratio (heuristic LAB-Otsu)
-- color_descriptor
-- texture_descriptor
+- redness_contrast (delta a*)
+- component_count (number of connected lesion components)
+- dispersion (spatial spread of components)
+- texture (lightness variation inside lesion)
+- light_contrast (delta L*)
+- color_descriptor & texture_descriptor
 - lesion_count (NullDetector -> ABSTAIN with reason "no_weights")
 - Out of scope checking (T07)
 - Try/except safety wrapper: errors -> MODEL_UNAVAILABLE, never stale data (T09)
@@ -32,7 +36,7 @@ def measure_observation(
 ) -> list:
     """
     Measure visual features of an observation.
-    Returns list of Measurement dictionaries.
+    Returns list of Measurement dictionaries with provenance='ai_measured'.
     """
     # T09: Safety failure handling
     if simulate_failure:
@@ -68,12 +72,13 @@ def measure_observation(
         roi_img = img.crop((x1, y1, x2, y2))
     else:
         # Default center crop
-        roi_img = img.crop((int(w * 0.2), int(h * 0.2), int(w * 0.8), int(h * 0.8)))
+        roi_img = img.crop((int(w * 0.15), int(h * 0.15), int(w * 0.85), int(h * 0.85)))
 
-    # 1. Affected area ratio (heuristic LAB-Otsu)
+    # Segment lesion and compute all 6 visual metrics
     seg_res = segment_lesion_roi(roi_img)
 
     measurements = [
+        # 1. Affected area ratio
         {
             "metric_name": "affected_area_ratio",
             "value": seg_res["affected_area_ratio"],
@@ -86,39 +91,67 @@ def measure_observation(
                 "mask_pixels": seg_res["mask_count"],
                 "roi_pixels": seg_res["total_pixels"]
             }
+        },
+        # 2. Redness contrast
+        {
+            "metric_name": "redness_contrast",
+            "value": seg_res["redness_contrast"],
+            "unit": "delta_a",
+            "confidence": seg_res["confidence"],
+            "model_version": seg_res["model_version"],
+            "provenance": "ai_measured",
+            "details": {"color_descriptor": seg_res["color_descriptor"]}
+        },
+        # 3. Component count
+        {
+            "metric_name": "component_count",
+            "value": float(seg_res["component_count"]),
+            "unit": "count",
+            "confidence": seg_res["confidence"],
+            "model_version": seg_res["model_version"],
+            "provenance": "ai_measured",
+            "details": {"component_count": seg_res["component_count"]}
+        },
+        # 4. Dispersion
+        {
+            "metric_name": "dispersion",
+            "value": seg_res["dispersion"],
+            "unit": "normalized",
+            "confidence": seg_res["confidence"],
+            "model_version": seg_res["model_version"],
+            "provenance": "ai_measured",
+            "details": {"spatial_dispersion": seg_res["dispersion"]}
+        },
+        # 5. Texture
+        {
+            "metric_name": "texture",
+            "value": seg_res["texture"],
+            "unit": "normalized",
+            "confidence": seg_res["confidence"],
+            "model_version": seg_res["model_version"],
+            "provenance": "ai_measured",
+            "details": {"texture_descriptor": seg_res["texture_descriptor"]}
+        },
+        # 6. Light contrast
+        {
+            "metric_name": "light_contrast",
+            "value": seg_res["light_contrast"],
+            "unit": "delta_L",
+            "confidence": seg_res["confidence"],
+            "model_version": seg_res["model_version"],
+            "provenance": "ai_measured",
+            "details": {"delta_lightness": seg_res["light_contrast"]}
+        },
+        # 7. Lesion detector (NullDetector -> ABSTAIN with no_weights)
+        {
+            "metric_name": "lesion_count",
+            "value": 0.0,
+            "unit": "count",
+            "confidence": 0.0,
+            "model_version": "NullDetector-1.0",
+            "provenance": "ai_measured",
+            "details": AcneDetector().detect(image_bytes)
         }
     ]
-
-    # 2. Color descriptor (RGB mean in ROI)
-    try:
-        pixels = list(roi_img.getdata())
-        avg_r = sum(p[0] for p in pixels) / len(pixels)
-        avg_g = sum(p[1] for p in pixels) / len(pixels)
-        avg_b = sum(p[2] for p in pixels) / len(pixels)
-        red_contrast = round((avg_r - (avg_g + avg_b) / 2.0), 2)
-        measurements.append({
-            "metric_name": "redness_contrast",
-            "value": red_contrast,
-            "unit": "delta_rgb",
-            "confidence": 0.85,
-            "model_version": "heuristic-lab-otsu-0.1",
-            "provenance": "ai_measured",
-            "details": {"mean_rgb": [round(avg_r, 1), round(avg_g, 1), round(avg_b, 1)]}
-        })
-    except Exception:
-        pass
-
-    # 3. Lesion detector (NullDetector -> ABSTAIN with no_weights)
-    detector = AcneDetector()
-    det_res = detector.detect(image_bytes)
-    measurements.append({
-        "metric_name": "lesion_count",
-        "value": 0.0,
-        "unit": "count",
-        "confidence": 0.0,
-        "model_version": "NullDetector-1.0",
-        "provenance": "ai_measured",
-        "details": det_res
-    })
 
     return measurements

@@ -106,9 +106,36 @@ def check_clinician_has_consent(
     record_audit_event(clinician_id, "clinician", "view_case", "case", case_id, "allow", ip)
     return dict(consent)
 
-def enforce_admin(user_role: str, user_id: str, action: str, ip: str = "127.0.0.1"):
-    """Verify admin role."""
-    if user_role != "admin":
-        record_audit_event(user_id, user_role, action, "admin_resource", "all", "deny", ip)
-        raise ForbiddenException("Yêu cầu quyền Quản trị viên (Admin)")
-    record_audit_event(user_id, user_role, action, "admin_resource", "all", "allow", ip)
+def enforce_admin(arg1: str, arg2: str = None, arg3: str = None, ip: str = "127.0.0.1"):
+    """
+    Verify admin role.
+    Supports:
+    - enforce_admin(admin_id, action, [ip]): looks up admin_id in DB, requires role == 'admin' and status == 'active'.
+    - enforce_admin(role, user_id, action, [ip]): validates role == 'admin' and checks DB if user exists.
+    """
+    db = get_db()
+    if arg1 in ("admin", "patient", "clinician"):
+        # Called as (role, user_id, action, [ip])
+        role = arg1
+        user_id = arg2
+        act = arg3 or "admin_action"
+        if role != "admin":
+            record_audit_event(user_id, role, act, "admin_resource", "all", "deny", ip)
+            raise ForbiddenException("Yêu cầu quyền Quản trị viên (Admin)")
+        row = db.execute("SELECT role, status FROM users WHERE id = ?", (user_id,)).fetchone()
+        if row and (row["role"] != "admin" or row["status"] != "active"):
+            record_audit_event(user_id, row["role"], act, "admin_resource", "all", "deny", ip)
+            raise ForbiddenException("Yêu cầu quyền Quản trị viên (Admin)")
+        record_audit_event(user_id, "admin", act, "admin_resource", "all", "allow", ip)
+    else:
+        # Called as (admin_id, action, [ip])
+        user_id = arg1
+        act = arg2 or "admin_action"
+        if arg3 and ("." in str(arg3) or ":" in str(arg3)):
+            ip = str(arg3)
+        row = db.execute("SELECT role, status FROM users WHERE id = ?", (user_id,)).fetchone()
+        if not row or row["role"] != "admin" or row["status"] != "active":
+            actual_role = row["role"] if row else "unknown"
+            record_audit_event(user_id, actual_role, act, "admin_resource", "all", "deny", ip)
+            raise ForbiddenException("Yêu cầu quyền Quản trị viên (Admin)")
+        record_audit_event(user_id, "admin", act, "admin_resource", "all", "allow", ip)

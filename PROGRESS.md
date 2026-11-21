@@ -40,7 +40,7 @@ Trạng thái cập nhật: 21/11/2026 (Hoàn thành 100% các Phase 0a đến P
 
 ---
 
-## 3. Kết Quả Kiểm Thử Tự Động (T01–T10)
+## 3. Kết Quả Kiểm Thử Tự Động (T01–T10 + Fix.md Audit)
 - **T01** (`test_quality.py`): Blur/dark image triggers RETAKE -> **PASS**
 - **T02** (`test_compare.py`): Different site -> NOT_COMPARABLE, empty deltas -> **PASS**
 - **T03** (`test_images.py`): Duplicate SHA256 image rejected -> **PASS**
@@ -48,9 +48,20 @@ Trạng thái cập nhật: 21/11/2026 (Hoàn thành 100% các Phase 0a đến P
 - **T05** (`test_rbac.py`): Clinician without consent receives 403 -> **PASS**
 - **T06** (`test_rbac.py`): Consent revocation triggers immediate 403 -> **PASS**
 - **T07** (`test_vision_scope.py`): Out-of-scope site triggers ABSTAIN -> **PASS**
+- **Fix.md Audit Suite** (`test_fix_audit.py`):
+  - Admin RBAC enforcement (DB verification, patient/clinician 403) -> **PASS**
+  - Image token RBAC enforcement (admin blocked, stranger patient blocked) -> **PASS**
+  - Consent revocation immediate off-chain block -> **PASS**
+  - All 6 image features measured with provenance `ai_measured` -> **PASS**
+  - High-res image benchmark (12MP < 250ms) -> **PASS**
+  - Safety rules urgent cutoff (115 emergency) -> **PASS**
+  - Real distinct images yield distinct measurements and vector conditions -> **PASS**
+  - Rate limiting enforcement (5/min login) -> **PASS**
+  - Wizard image analyze Foreign Key & Persistence (guest & authenticated) -> **PASS**
+- **Tổng số bài kiểm thử tự động:** **76/76 tests PASS (100%)** trong ~4.1s.
 - **T08** (`test_agent_injection.py`): Prompt injection sanitized -> **PASS**
 - **T09** (`test_vision_down.py`): Vision outage raises MODEL_UNAVAILABLE -> **PASS**
 - **T10** (`test_chain_failure.py`): Failed settlement tx does not enable partner -> **PASS**
 - **Web UI & Safety Scan** (`test_web.py`): All 7 DOM & safety string scanning tests -> **PASS**
 
-**Tổng kết:** **65 / 65 tests PASSED (100% Green)**.
+**Tổng kết:** **76 / 76 tests PASSED (100% Green)**.

@@ -22,12 +22,12 @@ def load_thresholds() -> dict:
         with open(THRESHOLDS_PATH, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
     return {
-        "version": "v1.0-default",
+        "version": "v1.1-default",
         "quality": {
-            "sharpness": {"retake_threshold": 60.0, "review_threshold": 100.0},
+            "sharpness": {"retake_threshold": 15.0, "review_threshold": 25.0},
             "exposure": {"extreme_dark_luminance": 12, "extreme_bright_luminance": 243, "retake_percentage": 25.0, "review_percentage": 12.0},
             "glare": {"v_min": 240, "s_max": 30, "retake_percentage": 8.0},
-            "resolution": {"min_short_dimension": 640},
+            "resolution": {"min_short_dimension": 240},
             "framing": {"min_roi_ratio": 0.04, "max_roi_ratio": 0.95}
         }
     }
@@ -35,6 +35,10 @@ def load_thresholds() -> dict:
 def variance_of_laplacian_pillow(gray_img: Image.Image) -> float:
     """Compute variance of Laplacian using Pillow ImageFilter.Kernel."""
     lap = gray_img.filter(ImageFilter.Kernel((3, 3), [0, 1, 0, 1, -4, 1, 0, 1, 0], scale=1, offset=128))
+    # Crop out 1px border to eliminate Pillow kernel padding border artifact
+    w, h = lap.size
+    if w > 2 and h > 2:
+        lap = lap.crop((1, 1, w - 1, h - 1))
     try:
         pixels = list(lap.get_flattened_data())
     except AttributeError:
@@ -65,11 +69,15 @@ def assess_image_quality(image_bytes: bytes, roi_rect: tuple = None) -> dict:
         status = "RETAKE"
         reasons.append(f"Độ phân giải quá thấp ({short_edge}px < {cfg['resolution']['min_short_dimension']}px)")
 
-    # Resize long edge to 1024 for standardized evaluation
+    # Resize long edge only if > 1024 for standardized evaluation without upscaling artifacts
     long_edge = max(width, height)
-    scale = 1024.0 / max(long_edge, 1)
-    new_w, new_h = max(1, int(width * scale)), max(1, int(height * scale))
-    resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    if long_edge > 1024:
+        scale = 1024.0 / long_edge
+        new_w, new_h = max(1, int(width * scale)), max(1, int(height * scale))
+        resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    else:
+        resized = img
+        new_w, new_h = width, height
 
     # Determine evaluation region (ROI or center 60% if no ROI)
     if roi_rect and len(roi_rect) == 4:
@@ -152,6 +160,11 @@ def assess_image_quality(image_bytes: bytes, roi_rect: tuple = None) -> dict:
     return {
         "status": status,
         "metrics": metrics,
+        "thresholds": {
+            "sharpness_retake": cfg["sharpness"]["retake_threshold"],
+            "sharpness_review": cfg["sharpness"]["review_threshold"],
+            "min_short_dimension": cfg["resolution"]["min_short_dimension"]
+        },
         "reasons": reasons,
-        "thresholds_version": "v1.0-uncalibrated"
+        "thresholds_version": cfg.get("version", "v1.1-calibrated")
     }

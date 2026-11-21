@@ -33,9 +33,18 @@ def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) ->
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
     return round(R * c, 2)
 
-def sync_clinics():
-    """Load both directory (real) and demo (synthetic) clinics into database."""
+_clinics_synced = False
+
+def sync_clinics(force: bool = False):
+    """Load both directory (real) and demo (synthetic) clinics into database once on boot."""
+    global _clinics_synced
+    if _clinics_synced and not force:
+        return
     db = get_db()
+    count = db.execute("SELECT count(*) as cnt FROM clinics").fetchone()
+    if count and count["cnt"] > 0 and not force:
+        _clinics_synced = True
+        return
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     # 1. Real clinics (directory)
@@ -92,6 +101,7 @@ def sync_clinics():
                      partner_until, now, now)
                 )
     db.commit()
+    _clinics_synced = True
 
 def search_nearby_clinics(
     lat: float,
@@ -153,6 +163,36 @@ def search_nearby_clinics(
                 if r["listing_type"] == "directory":
                     item["public_note"] = "Thông tin công khai, vui lòng gọi điện xác nhận trước khi đến khám"
 
+            results.append(item)
+
+    # Fallback: if no clinics within radius_km (e.g. testing from other provinces/cities), calculate distance to all verified clinics
+    if not results:
+        for r in rows:
+            d_km = haversine_distance_km(lat, lng, r["lat"], r["lng"])
+            is_partner = bool(r["partner_until"] and r["partner_until"] > now_iso and r["listing_type"] == "partner")
+            item = {
+                "id": r["id"],
+                "name": r["name"],
+                "address_text": r["address_text"],
+                "address_note": r["address_note"],
+                "district": r["district"],
+                "phone": r["phone"],
+                "hours_note": r["hours_note"],
+                "lat": r["lat"],
+                "lng": r["lng"],
+                "distance_km": d_km,
+                "listing_type": r["listing_type"],
+                "is_partner": is_partner,
+                "is_synthetic": bool(r["is_synthetic"])
+            }
+            if is_partner:
+                item["partner_label"] = "Đối tác xác thực — hiển thị ưu tiên theo gói đối tác"
+                item["can_send_consent"] = True
+            else:
+                item["partner_label"] = None
+                item["can_send_consent"] = False
+                if r["listing_type"] == "directory":
+                    item["public_note"] = "Thông tin công khai, vui lòng gọi điện xác nhận trước khi đến khám"
             results.append(item)
 
     # SORTING: (1) Partner first (is_partner=True first), (2) distance ascending

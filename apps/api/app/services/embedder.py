@@ -98,6 +98,8 @@ class FeatureVectorEmbedder:
                 vec[key_to_idx["img_dispersion"]] = min(1.0, measurements["dispersion"])
             if "texture" in measurements:
                 vec[key_to_idx["img_texture"]] = min(1.0, measurements["texture"])
+            if "light_contrast" in measurements:
+                vec[key_to_idx["img_light_contrast"]] = min(1.0, max(0.0, measurements["light_contrast"] / 50.0))
 
         # L2 normalize
         norm = math.sqrt(sum(x * x for x in vec))

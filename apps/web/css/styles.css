@@ -253,18 +253,21 @@ nav.main-nav a:hover, nav.main-nav a.active {
 }
 
 /* Wizard Progress */
-.wizard-steps {
-  display: flex;
+.wizard-steps, .wizard-steps-bar {
+  display: flex !important;
+  flex-direction: row !important;
   justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 32px;
   position: relative;
+  width: 100%;
 }
-.wizard-steps::before {
+.wizard-steps::before, .wizard-steps-bar::before {
   content: "";
   position: absolute;
   top: 18px;
-  left: 20px;
-  right: 20px;
+  left: 30px;
+  right: 30px;
   height: 2px;
   background: var(--border);
   z-index: 1;
@@ -273,10 +276,14 @@ nav.main-nav a:hover, nav.main-nav a.active {
   position: relative;
   z-index: 2;
   text-align: center;
-  background: var(--bg);
-  padding: 0 8px;
+  background: var(--surface);
+  padding: 0 4px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.step-circle {
+.step-circle, .step-num {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -290,12 +297,13 @@ nav.main-nav a:hover, nav.main-nav a.active {
   margin: 0 auto 8px;
   transition: all 0.3s;
 }
-.wizard-step.active .step-circle {
+.wizard-step.active .step-circle, .wizard-step.active .step-num {
   background: var(--primary);
   border-color: var(--primary);
   color: #fff;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
 }
-.wizard-step.completed .step-circle {
+.wizard-step.completed .step-circle, .wizard-step.completed .step-num {
   background: #10b981;
   border-color: #10b981;
   color: #fff;
@@ -304,6 +312,7 @@ nav.main-nav a:hover, nav.main-nav a.active {
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 .wizard-step.active .step-title {
   color: var(--primary);

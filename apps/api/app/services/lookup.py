@@ -19,8 +19,18 @@ from app.config import LOOKUP_TOP_K, LOOKUP_MIN_COSINE
 
 CONDITIONS_YAML_PATH = "apps/api/app/knowledge/conditions.yaml"
 
-def sync_knowledge_base():
-    """Sync conditions from YAML into knowledge_conditions table."""
+_kb_synced = False
+
+def sync_knowledge_base(force: bool = False):
+    """Sync conditions from YAML into knowledge_conditions table once on boot."""
+    global _kb_synced
+    if _kb_synced and not force:
+        return
+    db = get_db()
+    count = db.execute("SELECT count(*) as cnt FROM knowledge_conditions").fetchone()
+    if count and count["cnt"] >= 20 and not force:
+        _kb_synced = True
+        return
     if not os.path.exists(CONDITIONS_YAML_PATH):
         return
     with open(CONDITIONS_YAML_PATH, "r", encoding="utf-8") as f:
@@ -65,6 +75,7 @@ def sync_knowledge_base():
                  weights_json, sites_json, emb_json, sources_json, version, now, now)
             )
     db.commit()
+    _kb_synced = True
 
 def lookup_similar_conditions(
     observation_id: str,
@@ -151,14 +162,17 @@ def lookup_similar_conditions(
     res_id = str(uuid.uuid4())
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     internal_results = [{"slug": m["slug"], "rank_internal": i+1} for i, m in enumerate(top_matches)]
-    db.execute(
-        """
-        INSERT INTO similar_condition_results (id, observation_id, embedder_version, kb_version, results, abstain_reason, created_at, updated_at)
-        VALUES (?, ?, 'fv-1', 'kb-2026.11-draft1', ?, ?, ?, ?)
-        """,
-        (res_id, observation_id, json.dumps(internal_results), abstain_reason, now, now)
-    )
-    db.commit()
+
+    # Only save if observation exists in observations table (prevents FOREIGN KEY failed for guests / unpersisted obs)
+    if db.execute("SELECT 1 FROM observations WHERE id = ?", (observation_id,)).fetchone():
+        db.execute(
+            """
+            INSERT INTO similar_condition_results (id, observation_id, embedder_version, kb_version, results, abstain_reason, created_at, updated_at)
+            VALUES (?, ?, 'fv-1', 'kb-2026.11-draft1', ?, ?, ?, ?)
+            """,
+            (res_id, observation_id, json.dumps(internal_results), abstain_reason, now, now)
+        )
+        db.commit()
 
     record_audit_event(user_id, "patient", "lookup_similar", "observation", observation_id, "allow", ip)
 

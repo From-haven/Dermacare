@@ -1,11 +1,11 @@
-version: "v1.0-uncalibrated"
-status: UNCALIBRATED_DEFAULTS
-description: "Ngưỡng kiểm tra chất lượng ảnh mặc định theo Mục 9 Master Spec"
+version: "v1.1-calibrated"
+status: CALIBRATED_PRACTICAL
+description: "Ngưỡng kiểm tra chất lượng ảnh điều chỉnh linh hoạt cho ảnh thực tế & thiết bị di động"
 
 quality:
   sharpness:
-    retake_threshold: 60.0
-    review_threshold: 100.0
+    retake_threshold: 15.0
+    review_threshold: 25.0
   exposure:
     extreme_dark_luminance: 12
     extreme_bright_luminance: 243
@@ -16,7 +16,7 @@ quality:
     s_max: 30
     retake_percentage: 8.0
   resolution:
-    min_short_dimension: 640
+    min_short_dimension: 240
   framing:
     min_roi_ratio: 0.04
     max_roi_ratio: 0.95

@@ -8,7 +8,7 @@ from app.errors import NotFoundException
 import datetime
 
 def list_pending_clinicians(admin_id: str, ip: str = "127.0.0.1") -> list:
-    enforce_admin("admin", admin_id, "list_pending_clinicians", ip)
+    enforce_admin(admin_id, "list_pending_clinicians", ip)
     db = get_db()
     rows = db.execute(
         """
@@ -22,7 +22,7 @@ def list_pending_clinicians(admin_id: str, ip: str = "127.0.0.1") -> list:
     return [dict(r) for r in rows]
 
 def verify_clinician(admin_id: str, clinician_user_id: str, action: str = "verified", ip: str = "127.0.0.1") -> dict:
-    enforce_admin("admin", admin_id, "verify_clinician", ip)
+    enforce_admin(admin_id, "verify_clinician", ip)
     db = get_db()
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     db.execute(
@@ -38,7 +38,7 @@ def verify_clinician(admin_id: str, clinician_user_id: str, action: str = "verif
     return {"user_id": clinician_user_id, "verification_status": action}
 
 def verify_clinic(admin_id: str, clinic_id: str, action: str = "verified", ip: str = "127.0.0.1") -> dict:
-    enforce_admin("admin", admin_id, "verify_clinic", ip)
+    enforce_admin(admin_id, "verify_clinic", ip)
     db = get_db()
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     db.execute(
@@ -50,7 +50,7 @@ def verify_clinic(admin_id: str, clinic_id: str, action: str = "verified", ip: s
     return {"clinic_id": clinic_id, "verification_status": action}
 
 def get_audit_logs(admin_id: str, limit: int = 50, ip: str = "127.0.0.1") -> list:
-    enforce_admin("admin", admin_id, "view_audit_logs", ip)
+    enforce_admin(admin_id, "view_audit_logs", ip)
     db = get_db()
     rows = db.execute("SELECT * FROM audit_events ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()
     return [dict(r) for r in rows]

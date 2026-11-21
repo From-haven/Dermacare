@@ -15,6 +15,7 @@ from app.core.db import get_db
 from app.core.audit import record_audit_event
 from app.core.crypto import encrypt_nonce
 from app.core.rbac import check_patient_owns_case
+from app.services.chain.client import chain_client
 from app.errors import ValidationException, NotFoundException, ForbiddenException, PartnerRequiredException
 
 def create_consent(user_id: str, data: dict, ip: str = "127.0.0.1") -> dict:
@@ -53,7 +54,9 @@ def create_consent(user_id: str, data: dict, ip: str = "127.0.0.1") -> dict:
     commitment_data = nonce32 + f"{consent_id}:{recipient_clinic_id}:{scope_hash}:{expires_at}".encode('utf-8')
     commitment = "0x" + hashlib.sha256(commitment_data).hexdigest()
 
-    grant_tx_id = f"0x{secrets.token_hex(32)}"
+    chain_res = chain_client.submit_grant(commitment, int((now + datetime.timedelta(days=days)).timestamp()))
+    grant_tx_id = chain_res.get("tx_hash", f"0x{secrets.token_hex(32)}")
+    chain_status = chain_res.get("status", "CONFIRMED")
 
     db.execute(
         """
@@ -72,9 +75,9 @@ def create_consent(user_id: str, data: dict, ip: str = "127.0.0.1") -> dict:
     db.execute(
         """
         INSERT INTO chain_transactions (id, kind, idempotency_key, status, tx_hash, chain_id, created_at, updated_at)
-        VALUES (?, 'consent_grant', ?, 'CONFIRMED', ?, 43113, ?, ?)
+        VALUES (?, 'consent_grant', ?, ?, ?, 43113, ?, ?)
         """,
-        (tx_id, f"grant_{consent_id}", grant_tx_id, now_iso, now_iso)
+        (tx_id, f"grant_{consent_id}", chain_status, grant_tx_id, now_iso, now_iso)
     )
     db.commit()
 
@@ -104,7 +107,9 @@ def revoke_consent(user_id: str, consent_id: str, ip: str = "127.0.0.1") -> dict
         raise ForbiddenException("Bạn không có quyền thu hồi consent của người khác")
 
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    revoke_tx_id = f"0x{secrets.token_hex(32)}"
+    chain_res = chain_client.submit_revoke(c["commitment"])
+    revoke_tx_id = chain_res.get("tx_hash", f"0x{secrets.token_hex(32)}")
+    chain_status = chain_res.get("status", "CONFIRMED")
 
     db.execute(
         """
@@ -120,9 +125,9 @@ def revoke_consent(user_id: str, consent_id: str, ip: str = "127.0.0.1") -> dict
     db.execute(
         """
         INSERT INTO chain_transactions (id, kind, idempotency_key, status, tx_hash, chain_id, created_at, updated_at)
-        VALUES (?, 'consent_revoke', ?, 'CONFIRMED', ?, 43113, ?, ?)
+        VALUES (?, 'consent_revoke', ?, ?, ?, 43113, ?, ?)
         """,
-        (tx_id, f"revoke_{consent_id}", revoke_tx_id, now_iso, now_iso)
+        (tx_id, f"revoke_{consent_id}", chain_status, revoke_tx_id, now_iso, now_iso)
     )
     db.commit()
 
@@ -133,6 +138,36 @@ def revoke_consent(user_id: str, consent_id: str, ip: str = "127.0.0.1") -> dict
         "status": "revoked",
         "revoked_at": now_iso,
         "tx_hash": revoke_tx_id
+    }
+
+def get_consent(user_id: str, consent_id: str, ip: str = "127.0.0.1") -> dict:
+    db = get_db()
+    c = db.execute("SELECT * FROM consents WHERE id = ?", (consent_id,)).fetchone()
+    if not c:
+        raise NotFoundException("Consent không tồn tại")
+    if c["patient_id"] != user_id:
+        record_audit_event(user_id, "patient", "view_consent", "consent", consent_id, "deny", ip)
+        raise ForbiddenException("Bạn không có quyền xem consent này")
+    record_audit_event(user_id, "patient", "view_consent", "consent", consent_id, "allow", ip)
+    res = dict(c)
+    res["scope"] = json.loads(res["scope"]) if isinstance(res["scope"], str) else res["scope"]
+    return res
+
+def get_consent_chain(user_id: str, consent_id: str, ip: str = "127.0.0.1") -> dict:
+    db = get_db()
+    c = db.execute("SELECT * FROM consents WHERE id = ?", (consent_id,)).fetchone()
+    if not c:
+        raise NotFoundException("Consent không tồn tại")
+    tx = db.execute(
+        "SELECT * FROM chain_transactions WHERE idempotency_key = ? OR tx_hash = ?", 
+        (f"grant_{consent_id}", c["grant_tx_id"])
+    ).fetchone()
+    return {
+        "consent_id": consent_id,
+        "commitment": c["commitment"],
+        "grant_tx_id": c["grant_tx_id"],
+        "revoke_tx_id": c["revoke_tx_id"],
+        "chain_transaction": dict(tx) if tx else None
     }
 
 def list_user_consents(user_id: str, ip: str = "127.0.0.1") -> list:

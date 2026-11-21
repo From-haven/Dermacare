@@ -20,7 +20,7 @@ def compute_phash(image_bytes: bytes) -> str:
     """Compute 64-bit perceptual hash (pHash) for image duplicate detection."""
     try:
         img = Image.open(io.BytesIO(image_bytes)).convert("L").resize((8, 8), Image.Resampling.LANCZOS)
-        pixels = list(img.getdata())
+        pixels = list(img.tobytes())
         avg = sum(pixels) / len(pixels)
         bits = "".join("1" if p > avg else "0" for p in pixels)
         return f"{int(bits, 2):016x}"

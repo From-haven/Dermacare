@@ -35,5 +35,19 @@ class TestQualityGate(unittest.TestCase):
         self.assertEqual(report["status"], "RETAKE")
         self.assertTrue(any("tối" in r.lower() or "sáng" in r.lower() for r in report["reasons"]))
 
+    def test_04_T01_moderate_resolution_image_passes(self):
+        """Moderate resolution (e.g. 303px, 480px) and sharpness >= 15 passes gate."""
+        from PIL import Image, ImageDraw
+        import io
+        img = Image.new("RGB", (320, 303), color=(220, 180, 150))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([100, 100, 200, 200], fill=(200, 80, 70))
+        for i in range(50, 250, 10):
+            draw.line([i, 80, i, 220], fill=(230, 190, 160), width=1)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=90)
+        report = assess_image_quality(buf.getvalue())
+        self.assertIn(report["status"], ["PASS", "REVIEW"])
+
 if __name__ == "__main__":
     unittest.main()

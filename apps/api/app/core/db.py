@@ -10,24 +10,30 @@ import json
 import math
 import datetime
 
+import threading
+
 DB_PATH = "data/derma.db"
 
-_connection = None
+_local = threading.local()
 
 def get_db():
-    global _connection
-    if _connection is None:
+    if not hasattr(_local, "conn") or _local.conn is None:
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        _connection = sqlite3.connect(DB_PATH, check_same_thread=False)
-        _connection.row_factory = sqlite3.Row
-        _connection.execute("PRAGMA foreign_keys = ON")
-    return _connection
+        conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=10.0)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA busy_timeout = 5000")
+        _local.conn = conn
+    return _local.conn
 
 def close_db():
-    global _connection
-    if _connection:
-        _connection.close()
-        _connection = None
+    if hasattr(_local, "conn") and _local.conn is not None:
+        try:
+            _local.conn.close()
+        except Exception:
+            pass
+        _local.conn = None
 
 def cosine_similarity(v1: list, v2: list) -> float:
     """Compute cosine similarity between two float vectors."""
