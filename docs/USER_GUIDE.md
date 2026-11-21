@@ -17,9 +17,11 @@ Chào mừng bạn đến với **DermaCare Agent**, ứng dụng hỗ trợ the
    - Chọn thời gian khởi phát tổn thương (dưới 1 tuần, vài tuần, vài tháng).
    - Đánh dấu cảm giác đi kèm (ngứa, đau rát, khô da, ửng đỏ).
    - Kiểm tra dấu hiệu cảnh báo đỏ (chảy máu, sốt, lan nhanh).
-3. **Bước 3 — Chụp ảnh tổn thương (Quality Gate):**
-   - Đặt camera cách tổn thương 15–20 cm.
-   - Hệ thống tự động kiểm tra độ sắc nét, độ phơi sáng và chống lóa. Nếu ảnh bị mờ hoặc tối, hệ thống sẽ yêu cầu chụp lại để đảm bảo tính khách quan y học.
+3. **Bước 3 — Chụp ảnh tổn thương (Quality Gate & Hỗ trợ đa phương thức):**
+   - **Tùy chọn A — Chụp trực tiếp từ Camera:** Mở camera thiết bị (hỗ trợ đổi camera trước/sau), căn chỉnh tổn thương vào giữa khung định vị elip (15–20 cm) và bấm chụp tức thì.
+   - **Tùy chọn B — Chọn ảnh từ Thư viện:** Tải lên tệp ảnh đã chụp sẵn từ album hoặc thư viện của thiết bị.
+   - **Tùy chọn C — Sử dụng ảnh mẫu sắc nét:** Thử nghiệm nhanh tính năng bằng ảnh mẫu chuẩn hóa y tế.
+   - Hệ thống tự động kiểm tra thời gian thực: độ sắc nét (Laplacian), độ phơi sáng và chống chói lóa. Nếu ảnh bị mờ hoặc quá tối, hệ thống sẽ đưa ra khuyến nghị để chụp lại.
 4. **Bước 4 — Xem danh sách tình trạng tương đồng tham khảo (`SimilarConditionsPanel`):**
    - Các tình trạng y khoa có biểu hiện tương tự được liệt kê theo thứ tự bảng chữ cái.
    - Không có tỷ lệ phần trăm xác suất hay xếp hạng nặng/nhẹ.

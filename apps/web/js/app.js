@@ -16,6 +16,7 @@ const STATE = {
     redFlags: [],
     observationId: null,
     qualityResult: null,
+    previewSrc: null,
     similarConditions: [],
     selectedClinic: null,
     consentScope: "full",
@@ -343,6 +344,9 @@ function navigate(route) {
 window.addEventListener("hashchange", renderApp);
 
 function renderApp() {
+  if (typeof window.stopCameraStream === "function") {
+    window.stopCameraStream();
+  }
   const hash = window.location.hash.slice(1) || "/";
   const root = document.getElementById("app-root");
   updateNav();
@@ -653,6 +657,7 @@ function renderWizardStepContent(step) {
       </div>
     `;
   } else if (step === 3) {
+    const hasImage = !!STATE.wizard.previewSrc;
     return `
       <div class="card-header">
         <h3 class="card-title">Bước 3: Chụp ảnh tổn thương với khung kiểm tra chất lượng</h3>
@@ -661,14 +666,65 @@ function renderWizardStepContent(step) {
       <p style="color:#64748b; margin-bottom:12px;">Đảm bảo camera cách tổn thương 15-20cm, ánh sáng tự nhiên đều, không bị bóng mờ hay chói sáng.</p>
       
       <div class="capture-box" id="capture-container">
-        <div id="capture-placeholder">
+        <!-- Tùy chọn 1: Menu lựa chọn song song (Camera hoặc Thư viện hoặc Ảnh mẫu) -->
+        <div id="capture-placeholder" style="${hasImage ? 'display:none;' : 'display:block;'}">
           <div style="font-size:3rem; margin-bottom:8px;">📸</div>
-          <p style="margin-bottom:12px;">Chọn ảnh từ thiết bị hoặc sử dụng ảnh mẫu để kiểm tra tự động</p>
+          <p style="margin-bottom:14px; font-weight:500; color:#1e293b;">
+            Chụp trực tiếp từ camera hoặc chọn ảnh từ thư viện thiết bị
+          </p>
           <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="window.handleImageSelect(event)">
-          <button class="btn btn-outline" onclick="document.getElementById('image-input').click()">Chọn tệp ảnh</button>
-          <button class="btn btn-primary" onclick="window.useSampleImage()">Sử dụng ảnh mẫu sắc nét</button>
+          <div class="capture-options">
+            <button type="button" class="btn btn-primary" onclick="window.startCameraStream()">
+              📷 Mở camera chụp trực tiếp
+            </button>
+            <button type="button" class="btn btn-outline" onclick="document.getElementById('image-input').click()">
+              🖼️ Chọn ảnh từ thư viện
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="window.useSampleImage()">
+              🧪 Sử dụng ảnh mẫu sắc nét
+            </button>
+          </div>
         </div>
-        <img id="capture-preview" class="capture-preview-img" style="display:none;" />
+
+        <!-- Tùy chọn 2: Khung hình Camera trực tiếp -->
+        <div id="camera-view" style="display:none; width:100%;">
+          <div class="camera-feed-container">
+            <video id="camera-video" class="camera-video" autoplay playsinline muted></video>
+            <div class="camera-reticle">
+              <div class="camera-reticle-inner"></div>
+            </div>
+            <div class="camera-reticle-text">Căn chỉnh vùng tổn thương vào giữa khung (15–20cm)</div>
+          </div>
+          <div class="camera-controls-bar">
+            <button type="button" class="btn btn-outline btn-sm" style="color:#ffffff; border-color:#475569;" onclick="window.switchCamera()" title="Đổi camera trước/sau">
+              🔄 Đổi camera
+            </button>
+            <button type="button" class="btn-shutter" onclick="window.captureSnapshot()" title="Bấm chụp ảnh">
+              📸
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" style="color:#ffffff; border-color:#475569;" onclick="window.stopCameraStream()" title="Đóng camera">
+              ✕ Đóng
+            </button>
+          </div>
+        </div>
+
+        <!-- Tùy chọn 3: Xem trước ảnh đã chụp / chọn kèm chức năng chụp lại -->
+        <div id="capture-preview-container" style="${hasImage ? 'display:block;' : 'display:none;'} width:100%;">
+          <img id="capture-preview" class="capture-preview-img" src="${STATE.wizard.previewSrc || ''}" />
+          <div class="preview-actions-bar">
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.startCameraStream()">
+              📷 Chụp lại bằng camera
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('image-input').click()">
+              🖼️ Chọn ảnh khác từ thư viện
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="window.useSampleImage()">
+              🧪 Dùng ảnh mẫu
+            </button>
+          </div>
+        </div>
+
+        <canvas id="capture-canvas" style="display:none;"></canvas>
       </div>
 
       <div id="quality-card-area">
@@ -676,8 +732,8 @@ function renderWizardStepContent(step) {
       </div>
 
       <div style="display:flex; justify-content:space-between; margin-top:24px;">
-        <button class="btn btn-outline" onclick="STATE.wizard.step = 2; renderApp();">← Quay lại</button>
-        <button class="btn btn-primary" id="btn-to-step-4" ${STATE.wizard.qualityResult?.status === 'PASS' ? '' : 'disabled'} onclick="STATE.wizard.step = 4; renderApp();">Tiếp tục: Xem danh sách tham khảo →</button>
+        <button class="btn btn-outline" onclick="window.stopCameraStream(); STATE.wizard.step = 2; renderApp();">← Quay lại</button>
+        <button class="btn btn-primary" id="btn-to-step-4" ${STATE.wizard.qualityResult?.status === 'PASS' ? '' : 'disabled'} onclick="window.stopCameraStream(); STATE.wizard.step = 4; renderApp();">Tiếp tục: Xem danh sách tham khảo →</button>
       </div>
     `;
   } else if (step === 4) {
@@ -764,7 +820,236 @@ window.saveWizardSymptoms = () => {
   renderApp();
 };
 
+let currentCameraStream = null;
+let currentFacingMode = "environment";
+
+window.startCameraStream = async () => {
+  const placeholder = document.getElementById("capture-placeholder");
+  const cameraView = document.getElementById("camera-view");
+  const previewContainer = document.getElementById("capture-preview-container");
+  const video = document.getElementById("camera-video");
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert("Trình duyệt hiện tại không hỗ trợ truy cập camera trực tiếp. Vui lòng sử dụng tính năng Chọn ảnh từ thư viện.");
+    return;
+  }
+
+  // Dừng stream trước đó nếu có
+  if (currentCameraStream) {
+    try {
+      currentCameraStream.getTracks().forEach(t => t.stop());
+    } catch (_) {}
+    currentCameraStream = null;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: currentFacingMode,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    });
+    currentCameraStream = stream;
+    if (placeholder) placeholder.style.display = "none";
+    if (previewContainer) previewContainer.style.display = "none";
+    if (cameraView) cameraView.style.display = "block";
+    if (video) {
+      video.srcObject = stream;
+      try {
+        await video.play();
+      } catch (_) {}
+    }
+  } catch (err) {
+    console.warn("Could not start camera with constraints, attempting fallback:", err);
+    try {
+      const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      currentCameraStream = fallbackStream;
+      if (placeholder) placeholder.style.display = "none";
+      if (previewContainer) previewContainer.style.display = "none";
+      if (cameraView) cameraView.style.display = "block";
+      if (video) {
+        video.srcObject = fallbackStream;
+        try {
+          await video.play();
+        } catch (_) {}
+      }
+    } catch (fallbackErr) {
+      alert("Không thể mở camera. Vui lòng cho phép quyền truy cập camera trong trình duyệt hoặc sử dụng tùy chọn Chọn ảnh từ thư viện.");
+    }
+  }
+};
+
+window.stopCameraStream = () => {
+  if (currentCameraStream) {
+    try {
+      currentCameraStream.getTracks().forEach(t => t.stop());
+    } catch (_) {}
+    currentCameraStream = null;
+  }
+  const video = document.getElementById("camera-video");
+  if (video) video.srcObject = null;
+
+  const placeholder = document.getElementById("capture-placeholder");
+  const cameraView = document.getElementById("camera-view");
+  const previewContainer = document.getElementById("capture-preview-container");
+
+  if (cameraView) cameraView.style.display = "none";
+  if (STATE.wizard.previewSrc) {
+    if (previewContainer) previewContainer.style.display = "block";
+  } else {
+    if (placeholder) placeholder.style.display = "block";
+  }
+};
+
+window.switchCamera = async () => {
+  currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
+  await window.startCameraStream();
+};
+
+window.captureSnapshot = () => {
+  const video = document.getElementById("camera-video");
+  if (!video || !video.videoWidth) {
+    alert("Camera chưa sẵn sàng để chụp. Vui lòng đợi trong giây lát.");
+    return;
+  }
+
+  let canvas = document.getElementById("capture-canvas");
+  if (!canvas) {
+    canvas = document.createElement("canvas");
+    canvas.id = "capture-canvas";
+    canvas.style.display = "none";
+    document.body.appendChild(canvas);
+  }
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+  STATE.wizard.previewSrc = dataUrl;
+
+  window.stopCameraStream();
+
+  const previewContainer = document.getElementById("capture-preview-container");
+  const previewImg = document.getElementById("capture-preview");
+  const placeholder = document.getElementById("capture-placeholder");
+
+  if (placeholder) placeholder.style.display = "none";
+  if (previewContainer) previewContainer.style.display = "block";
+  if (previewImg) previewImg.src = dataUrl;
+
+  window.evaluateImageQuality(canvas, ctx);
+};
+
+window.evaluateImageQuality = (canvas, ctx) => {
+  const w = canvas.width;
+  const h = canvas.height;
+  const sampleW = Math.min(240, w);
+  const sampleH = Math.min(240, h);
+  const startX = Math.floor((w - sampleW) / 2);
+  const startY = Math.floor((h - sampleH) / 2);
+
+  const imgData = ctx.getImageData(startX, startY, sampleW, sampleH);
+  const data = imgData.data;
+  const pixelCount = sampleW * sampleH;
+
+  let totalLum = 0;
+  let glareCount = 0;
+  const gray = new Float32Array(pixelCount);
+
+  for (let i = 0; i < pixelCount; i++) {
+    const idx = i * 4;
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+    gray[i] = lum;
+    totalLum += lum;
+    if (r > 248 && g > 248 && b > 248) {
+      glareCount++;
+    }
+  }
+
+  const avgExposure = totalLum / pixelCount;
+  const glareRatio = glareCount / pixelCount;
+
+  // Tính phương sai Laplacian rời rạc trên vùng trung tâm
+  let lapSum = 0;
+  let lapSumSq = 0;
+  let count = 0;
+  for (let y = 1; y < sampleH - 1; y++) {
+    for (let x = 1; x < sampleW - 1; x++) {
+      const c = gray[y * sampleW + x];
+      const top = gray[(y - 1) * sampleW + x];
+      const bottom = gray[(y + 1) * sampleW + x];
+      const left = gray[y * sampleW + (x - 1)];
+      const right = gray[y * sampleW + (x + 1)];
+      const lap = 4 * c - (top + bottom + left + right);
+      lapSum += lap;
+      lapSumSq += lap * lap;
+      count++;
+    }
+  }
+
+  const meanLap = count > 0 ? (lapSum / count) : 0;
+  const variance = count > 0 ? (lapSumSq / count) - (meanLap * meanLap) : 0;
+  const sharpness = Math.max(0, variance);
+
+  const isSharp = sharpness >= 45;
+  const isGoodExposure = avgExposure >= 45 && avgExposure <= 220;
+  const isLowGlare = glareRatio < 0.15;
+  const isGoodRes = w >= 400 && h >= 400;
+
+  const isPass = isSharp && isGoodExposure && isLowGlare && isGoodRes;
+
+  let rec = "Ảnh sắc nét, ánh sáng đạt chuẩn y tế.";
+  if (!isSharp) {
+    rec = "Ảnh bị mờ hoặc rung tay. Vui lòng giữ chắc tay và chụp lại cách tổn thương 15-20cm.";
+  } else if (avgExposure < 45) {
+    rec = "Ảnh quá tối. Vui lòng bật thêm đèn hoặc di chuyển đến nơi đủ ánh sáng.";
+  } else if (avgExposure > 220) {
+    rec = "Ảnh bị thừa sáng hoặc bóng đèn chiếu thẳng. Vui lòng điều chỉnh góc chụp.";
+  } else if (!isLowGlare) {
+    rec = "Phát hiện chói lóa trên bề mặt da. Vui lòng tắt đèn flash và nghiêng nhẹ góc chụp.";
+  }
+
+  STATE.wizard.qualityResult = {
+    status: isPass ? "PASS" : "RETAKE",
+    sharpness_score: Number(sharpness.toFixed(1)),
+    exposure_score: Number(avgExposure.toFixed(1)),
+    glare_ratio: Number(glareRatio.toFixed(3)),
+    resolution: [w, h],
+    recommendation: rec
+  };
+
+  // Nạp danh sách tham khảo nếu chưa có
+  if (!STATE.wizard.similarConditions || STATE.wizard.similarConditions.length === 0) {
+    STATE.wizard.similarConditions = [
+      { id: "acne_vulgaris", title_vi: "Mụn trứng cá thông thường", summary_vi: "Tổn thương viêm nang lông tuyến bã, biểu hiện sẩn, mụn mủ hoặc nhân mụn.", reviewed_by_clinician: false, sources: ["Fitzpatrick Dermatology"] },
+      { id: "atopic_dermatitis", title_vi: "Viêm da cơ địa", summary_vi: "Ban đỏ ngứa ngáy, da khô trợt nứt, tiến triển từng đợt mạn tính.", reviewed_by_clinician: false, sources: ["Rook's Textbook of Dermatology"] },
+      { id: "psoriasis_vulgaris", title_vi: "Vảy nến mảng thông thường", summary_vi: "Mảng hồng ban giới hạn rõ, phủ vảy trắng bạc dễ bong xếp tầng.", reviewed_by_clinician: false, sources: ["Braun-Falco Dermatology"] }
+    ];
+  }
+
+  const qArea = document.getElementById("quality-card-area");
+  if (qArea) qArea.innerHTML = QualityResultCard(STATE.wizard.qualityResult);
+
+  const btnNext = document.getElementById("btn-to-step-4");
+  if (btnNext) {
+    if (isPass) {
+      btnNext.removeAttribute("disabled");
+    } else {
+      btnNext.setAttribute("disabled", "disabled");
+    }
+  }
+};
+
 window.useSampleImage = () => {
+  window.stopCameraStream();
+
   STATE.wizard.qualityResult = {
     status: "PASS",
     sharpness_score: 184.2,
@@ -773,6 +1058,8 @@ window.useSampleImage = () => {
     resolution: [1024, 768],
     recommendation: "Ảnh sắc nét, ánh sáng đạt chuẩn y tế."
   };
+  STATE.wizard.previewSrc = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' style='background:%23e0f2fe;'><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%230369a1'>ẢNH MẪU SẮC NÉT (SYNTHETIC MOCK)</text></svg>";
+
   // Sample similar conditions
   STATE.wizard.similarConditions = [
     { id: "acne_vulgaris", title_vi: "Mụn trứng cá thông thường", summary_vi: "Tổn thương viêm nang lông tuyến bã, biểu hiện sẩn, mụn mủ hoặc nhân mụn.", reviewed_by_clinician: false, sources: ["Fitzpatrick Dermatology"] },
@@ -780,13 +1067,16 @@ window.useSampleImage = () => {
     { id: "psoriasis_vulgaris", title_vi: "Vảy nến mảng thông thường", summary_vi: "Mảng hồng ban giới hạn rõ, phủ vảy trắng bạc dễ bong xếp tầng.", reviewed_by_clinician: false, sources: ["Braun-Falco Dermatology"] }
   ];
 
-  const preview = document.getElementById("capture-preview");
   const placeholder = document.getElementById("capture-placeholder");
-  if (preview && placeholder) {
-    placeholder.style.display = "none";
-    preview.style.display = "block";
-    preview.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' style='background:%23e0f2fe;'><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%230369a1'>ẢNH MẪU SẮC NÉT (SYNTHETIC MOCK)</text></svg>";
-  }
+  const cameraView = document.getElementById("camera-view");
+  const previewContainer = document.getElementById("capture-preview-container");
+  const previewImg = document.getElementById("capture-preview");
+
+  if (placeholder) placeholder.style.display = "none";
+  if (cameraView) cameraView.style.display = "none";
+  if (previewContainer) previewContainer.style.display = "block";
+  if (previewImg) previewImg.src = STATE.wizard.previewSrc;
+
   const qArea = document.getElementById("quality-card-area");
   if (qArea) qArea.innerHTML = QualityResultCard(STATE.wizard.qualityResult);
   const btnNext = document.getElementById("btn-to-step-4");
@@ -796,16 +1086,41 @@ window.useSampleImage = () => {
 window.handleImageSelect = (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const preview = document.getElementById("capture-preview");
-    const placeholder = document.getElementById("capture-placeholder");
-    placeholder.style.display = "none";
-    preview.style.display = "block";
-    preview.src = reader.result;
 
-    // Simulate quality check
-    window.useSampleImage();
+  window.stopCameraStream();
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    const dataUrl = evt.target.result;
+    STATE.wizard.previewSrc = dataUrl;
+
+    const img = new Image();
+    img.onload = () => {
+      let canvas = document.getElementById("capture-canvas");
+      if (!canvas) {
+        canvas = document.createElement("canvas");
+        canvas.id = "capture-canvas";
+        canvas.style.display = "none";
+        document.body.appendChild(canvas);
+      }
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      const placeholder = document.getElementById("capture-placeholder");
+      const cameraView = document.getElementById("camera-view");
+      const previewContainer = document.getElementById("capture-preview-container");
+      const previewImg = document.getElementById("capture-preview");
+
+      if (placeholder) placeholder.style.display = "none";
+      if (cameraView) cameraView.style.display = "none";
+      if (previewContainer) previewContainer.style.display = "block";
+      if (previewImg) previewImg.src = dataUrl;
+
+      window.evaluateImageQuality(canvas, ctx);
+    };
+    img.src = dataUrl;
   };
   reader.readAsDataURL(file);
 };

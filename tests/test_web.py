@@ -111,5 +111,23 @@ class TestWebFrontend(unittest.TestCase):
         self.assertIn("synthetic-badge", self.css_content)
         self.assertIn("DEMO", self.js_content)
 
+    def test_dual_capture_mode_camera_and_library(self):
+        """Bước 3 phải hỗ trợ song song cả chụp trực tiếp từ camera và chọn ảnh từ thư viện."""
+        # Kiểm tra nút mở camera và hàm startCameraStream
+        self.assertIn("startCameraStream", self.js_content)
+        self.assertIn("stopCameraStream", self.js_content)
+        self.assertIn("captureSnapshot", self.js_content)
+        self.assertIn("evaluateImageQuality", self.js_content)
+        self.assertIn("Mở camera chụp trực tiếp", self.js_content)
+        
+        # Kiểm tra nút chọn từ thư viện
+        self.assertIn("Chọn ảnh từ thư viện", self.js_content)
+        self.assertIn("handleImageSelect", self.js_content)
+
+        # Kiểm tra phần tử camera video và reticle trong CSS
+        self.assertIn(".camera-video", self.css_content)
+        self.assertIn(".camera-reticle", self.css_content)
+        self.assertIn(".btn-shutter", self.css_content)
+
 if __name__ == "__main__":
     unittest.main()

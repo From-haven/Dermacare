@@ -38,3 +38,9 @@ File này ghi nhận các quyết định kiến trúc, lý do lựa chọn và 
 - **Quyết định:** Dữ liệu đẩy lên blockchain Avalanche chỉ chứa: commitment ngẫu nhiên `keccak256(nonce32, consentId, recipientClinicId, recipientUserId, scopeHash, expiry)` với `nonce32` là 32 bytes ngẫu nhiên từ CSPRNG.
 - **Lý do:** Tuyệt đối không để lộ danh tính, toạ độ, hay mối quan hệ bệnh nhân - bác sĩ lên sổ cái công khai.
 - **Phương án khác:** Hash trực tiếp thông tin bệnh nhân (bị loại vì dữ liệu ít entropy có thể bị tấn công rainbow table).
+
+
+### D08: Hỗ trợ chụp trực tiếp từ Camera (Live Camera Stream) song song với Thư viện
+- **Quyết định:** Bước 3 của Patient Wizard hỗ trợ song song 3 tùy chọn: (1) Mở camera trực tiếp (`getUserMedia`) với khung ngắm reticle định vị tổn thương chuẩn eKYC y tế và nút chụp snapshot, (2) Chọn tệp ảnh sẵn có từ thư viện/bộ nhớ thiết bị, và (3) Sử dụng ảnh mẫu sắc nét (phục vụ kiểm thử/demo). Khi chụp hoặc chọn xong, cung cấp nút "Chụp lại bằng camera" và đánh giá chất lượng tự động ngay trên máy khách.
+- **Lý do:** Đáp ứng nhu cầu chụp tức thì trên thiết bị di động/laptop có camera, đồng thời giữ nguyên khả năng tải ảnh từ album hoặc ảnh chất lượng cao chụp trước đó.
+- **Phương án khác:** Chỉ cho phép chọn tệp input file (bất tiện khi người dùng muốn soi chụp trực tiếp vùng da) hoặc chỉ cho phép camera (bất tiện nếu người dùng chụp bằng máy ảnh chuyên dụng/ảnh lưu sẵn).
